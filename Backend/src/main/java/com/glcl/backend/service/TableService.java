@@ -3,6 +3,8 @@ package com.glcl.backend.service;
 import com.glcl.backend.Entity.Table1Entity;
 import com.glcl.backend.repository.Table1Repository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -25,5 +27,9 @@ public class TableService {
 
     public ResponseEntity<Object> getData(){
         return ResponseEntity.ok().body(table1Repository.findAll());
+    }
+
+    public ResponseEntity<Object> findByName(String name){
+        return ResponseEntity.ok().body(table1Repository.findByName(name));
     }
 }

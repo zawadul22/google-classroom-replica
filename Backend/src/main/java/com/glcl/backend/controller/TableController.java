@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/table")
+@CrossOrigin
 public class TableController {
 
     private final TableService tableService;
@@ -21,5 +22,10 @@ public class TableController {
     @GetMapping
     public ResponseEntity<Object> getTables() {
         return tableService.getData();
+    }
+
+    @GetMapping("/name/{name}")
+    public ResponseEntity<Object> getName(@PathVariable String name){
+        return tableService.findByName(name);
     }
 }
