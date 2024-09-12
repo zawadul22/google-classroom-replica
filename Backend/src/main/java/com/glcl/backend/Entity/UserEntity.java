@@ -1,6 +1,5 @@
 package com.glcl.backend.Entity;
 
-import jakarta.annotation.Generated;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -13,9 +12,10 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @AllArgsConstructor
 @NoArgsConstructor
 @Document(collection = "table1")
-public class Table1Entity {
+public class UserEntity {
     @Id
     private String id;
     private String name;
-    private String position;
+    private String email;
+    private String password;
 }

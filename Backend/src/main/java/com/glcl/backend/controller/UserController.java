@@ -1,7 +1,8 @@
 package com.glcl.backend.controller;
 
-import com.glcl.backend.Entity.Table1Entity;
-import com.glcl.backend.service.TableService;
+import com.glcl.backend.Entity.UserEntity;
+import com.glcl.backend.model.UserModel;
+import com.glcl.backend.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -10,22 +11,22 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 @RequestMapping("/table")
 @CrossOrigin
-public class TableController {
+public class UserController {
 
-    private final TableService tableService;
+    private final UserService userService;
 
     @PostMapping("/save")
-    public ResponseEntity<Object> save(@RequestBody Table1Entity table1Entity) {
-        return tableService.create(table1Entity);
+    public ResponseEntity<Object> save(@RequestBody UserModel userModel) {
+        return userService.create(userModel);
     }
 
     @GetMapping
     public ResponseEntity<Object> getTables() {
-        return tableService.getData();
+        return userService.getData();
     }
 
     @GetMapping("/name/{name}")
     public ResponseEntity<Object> getName(@PathVariable String name){
-        return tableService.findByName(name);
+        return userService.findByName(name);
     }
 }
