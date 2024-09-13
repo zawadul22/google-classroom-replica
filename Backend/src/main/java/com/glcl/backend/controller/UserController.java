@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/table")
+@RequestMapping("/user")
 @CrossOrigin
 public class UserController {
 
