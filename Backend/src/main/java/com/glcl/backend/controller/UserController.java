@@ -13,20 +13,25 @@ import org.springframework.web.bind.annotation.*;
 @CrossOrigin
 public class UserController {
 
-    private final UserService userService;
+  private final UserService userService;
 
-    @PostMapping("/save")
-    public ResponseEntity<Object> save(@RequestBody UserModel userModel) {
-        return userService.create(userModel);
-    }
+  @PostMapping("/save")
+  public ResponseEntity<Object> save(@RequestBody UserModel userModel) {
+    return userService.create(userModel);
+  }
 
-    @GetMapping
-    public ResponseEntity<Object> getTables() {
-        return userService.getData();
-    }
+  @GetMapping
+  public ResponseEntity<Object> getTables() {
+    return userService.getData();
+  }
 
-    @GetMapping("/name/{name}")
-    public ResponseEntity<Object> getName(@PathVariable String name){
-        return userService.findByName(name);
-    }
+  @GetMapping("/name/{name}")
+  public ResponseEntity<Object> getName(@PathVariable String name) {
+    return userService.findByName(name);
+  }
+
+  @GetMapping("/classroom/{classroom}")
+  public ResponseEntity<Object> getClassroom(@PathVariable String classroom) {
+    return userService.getUserClassroom(classroom);
+  }
 }

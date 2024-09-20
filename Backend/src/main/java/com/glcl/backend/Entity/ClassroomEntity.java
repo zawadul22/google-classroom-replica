@@ -17,7 +17,7 @@ import java.util.List;
 @Document(collection = "classrooms")
 public class ClassroomEntity {
   @Id
-  private int id;
+  private String id;
   private String classroomName;
   @Reference(UserEntity.class)
   private List<UserEntity> teachers;

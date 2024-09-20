@@ -1,6 +1,6 @@
 package com.glcl.backend.controller;
 
-import com.glcl.backend.model.ClassroomModel;
+import com.glcl.backend.model.ClassroomCreateModel;
 import com.glcl.backend.service.ClassroomService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -14,9 +14,7 @@ public class ClassroomController {
   private final ClassroomService classroomService;
 
   @PostMapping(value = "/create")
-  public ResponseEntity<Object> createClassController(@RequestBody ClassroomModel classroomModel){
-    return classroomService.createClass(classroomModel);
+  public ResponseEntity<Object> createClassController(@RequestBody ClassroomCreateModel classroomCreateModel){
+    return classroomService.createClass(classroomCreateModel);
   }
-
-
 }

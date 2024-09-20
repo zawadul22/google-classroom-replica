@@ -8,5 +8,5 @@ import java.util.Optional;
 
 @Repository
 public interface ClassroomRepository extends MongoRepository<ClassroomEntity, String> {
-
+  ClassroomEntity findByClassroomName(String classroomName);
 }
