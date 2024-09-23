@@ -20,16 +20,6 @@ public class UserController {
     return userService.create(userModel);
   }
 
-  @GetMapping
-  public ResponseEntity<Object> getTables() {
-    return userService.getData();
-  }
-
-  @GetMapping("/name/{name}")
-  public ResponseEntity<Object> getName(@PathVariable String name) {
-    return userService.findByName(name);
-  }
-
   @GetMapping("/classroom/{classroom}")
   public ResponseEntity<Object> getClassroom(@PathVariable String classroom) {
     return userService.getUserClassroom(classroom);

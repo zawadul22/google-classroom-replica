@@ -1,5 +1,7 @@
 package com.glcl.backend.Entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -21,6 +23,7 @@ public class UserEntity {
     private String name;
     private String email;
     private String password;
+    @JsonBackReference
     @Reference(ClassroomEntity.class)
     private List<ClassroomEntity> classroom;
 }

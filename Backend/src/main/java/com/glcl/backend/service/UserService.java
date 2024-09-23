@@ -52,15 +52,7 @@ public class UserService {
               .toList();
       return ResponseEntity.ok().body(classes2);
     } catch (Exception e) {
-      throw new RuntimeException(e);
+      throw new RuntimeException(e.getCause());
     }
-  }
-
-  public ResponseEntity<Object> getData() {
-    return ResponseEntity.ok().body(userRepository.findAll());
-  }
-
-  public ResponseEntity<Object> findByName(String name) {
-    return ResponseEntity.ok().body(userRepository.findByName(name));
   }
 }
