@@ -1,6 +1,6 @@
 package com.glcl.backend.controller;
 
-import com.glcl.backend.model.AddUserModel;
+import com.glcl.backend.model.AddDeleteUserModel;
 import com.glcl.backend.model.ClassroomCreateModel;
 import com.glcl.backend.service.ClassroomService;
 import lombok.RequiredArgsConstructor;
@@ -20,7 +20,22 @@ public class ClassroomController {
   }
 
   @PutMapping(value = "/addUser")
-  public ResponseEntity<Object> addUserToClassroomController(@RequestBody AddUserModel addUserModel){
-    return classroomService.addUser(addUserModel);
+  public ResponseEntity<Object> addUserToClassroomController(@RequestBody AddDeleteUserModel addDeleteUserModel){
+    return classroomService.addUser(addDeleteUserModel);
+  }
+
+  @GetMapping(value = "/getTeachers")
+  public ResponseEntity<Object> getTeachersController(@RequestParam String classroomId){
+    return classroomService.getTeachers(classroomId);
+  }
+
+  @GetMapping(value = "/getStudents")
+  public ResponseEntity<Object> getStudentsController(@RequestParam String classroomId){
+    return classroomService.getStudents(classroomId);
+  }
+
+  @DeleteMapping(value = "/deleteUser")
+  public ResponseEntity<Object> deleteUserController(@RequestBody AddDeleteUserModel addDeleteUserModel){
+    return null;
   }
 }

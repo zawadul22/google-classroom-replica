@@ -11,6 +11,7 @@ import org.springframework.data.annotation.Reference;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.List;
+import java.util.Objects;
 
 @Data
 @Builder
@@ -27,4 +28,17 @@ public class ClassroomEntity {
   @JsonBackReference
   @Reference(UserEntity.class)
   private List<UserEntity> students;
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+    ClassroomEntity that = (ClassroomEntity) o;
+    return id.equals(that.id); // Compare only by ID
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(id);
+  }
 }
