@@ -22,12 +22,16 @@ public class ClassroomEntity {
   @Id
   private String id;
   private String classroomName;
+  private String code;
   @JsonBackReference
   @Reference(UserEntity.class)
   private List<UserEntity> teachers;
   @JsonBackReference
   @Reference(UserEntity.class)
   private List<UserEntity> students;
+  @JsonBackReference
+  @Reference(UserEntity.class)
+  private UserEntity creator;
 
   @Override
   public boolean equals(Object o) {

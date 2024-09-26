@@ -4,8 +4,11 @@ import com.glcl.backend.Entity.ClassroomEntity;
 import com.glcl.backend.Entity.UserEntity;
 import com.glcl.backend.model.AddDeleteUserModel;
 import com.glcl.backend.model.ClassroomCreateModel;
+import com.glcl.backend.model.JoinByCodeModel;
+import com.glcl.backend.model.LeaveClassroomModel;
 import com.glcl.backend.repository.ClassroomRepository;
 import com.glcl.backend.repository.UserRepository;
+import com.glcl.backend.utils.ClassroomUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -18,6 +21,7 @@ import java.util.*;
 public class ClassroomService {
   private final ClassroomRepository classroomRepository;
   private final UserRepository userRepository;
+  private final ClassroomUtils classroomUtils;
 
   public ResponseEntity<Object> createClass(ClassroomCreateModel classroomModel) {
     try {
@@ -29,6 +33,8 @@ public class ClassroomService {
       ClassroomEntity classroomEntity = ClassroomEntity.builder()
               .classroomName(classroomModel.getClassroomName())
               .teachers(teacher)
+              .code(classroomUtils.codeGenerate())
+              .creator(userEntity)
               .build();
       classroomRepository.save(classroomEntity);
       ClassroomEntity tempClassroomEntity = classroomRepository.findByClassroomName(classroomModel.getClassroomName());
@@ -108,6 +114,37 @@ public class ClassroomService {
     }
   }
 
+  public ResponseEntity<Object> joinByCode (JoinByCodeModel joinByCodeModel){
+    Optional<UserEntity> userEntityOptional = userRepository.findByEmail(joinByCodeModel.email);
+    UserEntity userEntity = new UserEntity();
+    if(userEntityOptional.isPresent()) {
+      userEntity = userEntityOptional.get();
+    }
+    else {
+      return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("message", "User not found"));
+    }
+    Optional<ClassroomEntity> classroomEntityOptional = classroomRepository.findClassroomEntityByCode(joinByCodeModel.code);
+    ClassroomEntity classroomEntity = new ClassroomEntity();
+    if(classroomEntityOptional.isPresent()) {
+      classroomEntity = classroomEntityOptional.get();
+    }
+    else {
+      return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("message", "Classroom not found"));
+    }
+    if(userEntity.getClassroom().contains(classroomEntity)) {
+      return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("message", "Already exists in this classroom"));
+    }
+    List<ClassroomEntity> classroomEntities = userEntity.getClassroom();
+    classroomEntities.add(classroomEntity);
+    userEntity.setClassroom(classroomEntities);
+    userRepository.save(userEntity);
+    List<UserEntity> students = classroomEntity.getStudents();
+    students.add(userEntity);
+    classroomEntity.setStudents(students);
+    classroomRepository.save(classroomEntity);
+    return ResponseEntity.status(HttpStatus.OK).body(Map.of("message","Successfully joined the classroom"));
+  }
+
   public ResponseEntity<Object> getTeachers(String classroomId) {
     Optional<ClassroomEntity> classroomEntityOptional = classroomRepository.findById(classroomId);
     if(classroomEntityOptional.isPresent()){
@@ -128,5 +165,10 @@ public class ClassroomService {
     else{
       return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("message", "Classroom not found"));
     }
+  }
+
+  public ResponseEntity<Object> leaveClassroom(LeaveClassroomModel leaveClassroomModel) {
+
+    return null;
   }
 }
