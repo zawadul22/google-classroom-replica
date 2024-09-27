@@ -11,6 +11,8 @@ import java.util.Optional;
 @Repository
 public interface ClassroomRepository extends MongoRepository<ClassroomEntity, String> {
   ClassroomEntity findByClassroomName(String classroomName);
+
   Optional<ClassroomEntity> findById(String id);
+
   Optional<ClassroomEntity> findClassroomEntityByCode(String code);
 }

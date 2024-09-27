@@ -3,6 +3,7 @@ package com.glcl.backend.controller;
 import com.glcl.backend.model.AddDeleteUserModel;
 import com.glcl.backend.model.ClassroomCreateModel;
 import com.glcl.backend.model.JoinByCodeModel;
+import com.glcl.backend.model.LeaveClassroomModel;
 import com.glcl.backend.service.ClassroomService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -43,5 +44,15 @@ public class ClassroomController {
   @PatchMapping(value = "/joinByCode")
   public ResponseEntity<Object> joinByCodeController(@RequestBody JoinByCodeModel joinByCodeModel) {
     return classroomService.joinByCode(joinByCodeModel);
+  }
+
+  @PatchMapping(value = "/leaveClassroom")
+  public ResponseEntity<Object> leaveClassroomController(@RequestBody LeaveClassroomModel leaveClassroomModel) {
+    return classroomService.leaveClassroom(leaveClassroomModel);
+  }
+
+  @DeleteMapping(value = "/removeClassroom")
+  public ResponseEntity<Object> removeClassroomController(@RequestBody LeaveClassroomModel leaveClassroomModel){
+    return classroomService.removeClassroom(leaveClassroomModel);
   }
 }

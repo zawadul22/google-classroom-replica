@@ -108,67 +108,130 @@ public class ClassroomService {
           userRepository.save(user);
         });
       }
-      return ResponseEntity.status(HttpStatus.OK).body(Map.of("message", addDeleteUserModel.getType()+" have been added successfully"));
+      return ResponseEntity.status(HttpStatus.OK).body(Map.of("message", addDeleteUserModel.getType() + " have been added successfully"));
     } catch (Exception e) {
-      throw new RuntimeException(e);
+      e.printStackTrace();
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("message", "Couldn't add because user/s"));
     }
   }
 
-  public ResponseEntity<Object> joinByCode (JoinByCodeModel joinByCodeModel){
-    Optional<UserEntity> userEntityOptional = userRepository.findByEmail(joinByCodeModel.email);
-    UserEntity userEntity = new UserEntity();
-    if(userEntityOptional.isPresent()) {
-      userEntity = userEntityOptional.get();
+  public ResponseEntity<Object> joinByCode(JoinByCodeModel joinByCodeModel) {
+    try {
+      Optional<UserEntity> userEntityOptional = userRepository.findByEmail(joinByCodeModel.email);
+      UserEntity userEntity = new UserEntity();
+      if (userEntityOptional.isPresent()) {
+        userEntity = userEntityOptional.get();
+      } else {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("message", "User not found"));
+      }
+      Optional<ClassroomEntity> classroomEntityOptional = classroomRepository.findClassroomEntityByCode(joinByCodeModel.code);
+      ClassroomEntity classroomEntity = new ClassroomEntity();
+      if (classroomEntityOptional.isPresent()) {
+        classroomEntity = classroomEntityOptional.get();
+      } else {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("message", "Classroom not found"));
+      }
+      if (userEntity.getClassroom().contains(classroomEntity)) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("message", "Already exists in this classroom"));
+      }
+      List<ClassroomEntity> classroomEntities = userEntity.getClassroom();
+      classroomEntities.add(classroomEntity);
+      userEntity.setClassroom(classroomEntities);
+      userRepository.save(userEntity);
+      List<UserEntity> students = classroomEntity.getStudents();
+      students.add(userEntity);
+      classroomEntity.setStudents(students);
+      classroomRepository.save(classroomEntity);
+      return ResponseEntity.status(HttpStatus.OK).body(Map.of("message", "Successfully joined the classroom"));
+    } catch (Exception e) {
+      e.printStackTrace();
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("message", "Couldn't join the classroom"));
     }
-    else {
-      return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("message", "User not found"));
-    }
-    Optional<ClassroomEntity> classroomEntityOptional = classroomRepository.findClassroomEntityByCode(joinByCodeModel.code);
-    ClassroomEntity classroomEntity = new ClassroomEntity();
-    if(classroomEntityOptional.isPresent()) {
-      classroomEntity = classroomEntityOptional.get();
-    }
-    else {
-      return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("message", "Classroom not found"));
-    }
-    if(userEntity.getClassroom().contains(classroomEntity)) {
-      return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("message", "Already exists in this classroom"));
-    }
-    List<ClassroomEntity> classroomEntities = userEntity.getClassroom();
-    classroomEntities.add(classroomEntity);
-    userEntity.setClassroom(classroomEntities);
-    userRepository.save(userEntity);
-    List<UserEntity> students = classroomEntity.getStudents();
-    students.add(userEntity);
-    classroomEntity.setStudents(students);
-    classroomRepository.save(classroomEntity);
-    return ResponseEntity.status(HttpStatus.OK).body(Map.of("message","Successfully joined the classroom"));
   }
 
   public ResponseEntity<Object> getTeachers(String classroomId) {
     Optional<ClassroomEntity> classroomEntityOptional = classroomRepository.findById(classroomId);
-    if(classroomEntityOptional.isPresent()){
+    if (classroomEntityOptional.isPresent()) {
       ClassroomEntity classroomEntity = classroomEntityOptional.get();
       return ResponseEntity.status(HttpStatus.OK).body(classroomEntity.getTeachers());
-    }
-    else{
+    } else {
       return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("message", "Classroom not found"));
     }
   }
 
   public ResponseEntity<Object> getStudents(String classroomId) {
     Optional<ClassroomEntity> classroomEntityOptional = classroomRepository.findById(classroomId);
-    if(classroomEntityOptional.isPresent()){
+    if (classroomEntityOptional.isPresent()) {
       ClassroomEntity classroomEntity = classroomEntityOptional.get();
       return ResponseEntity.status(HttpStatus.OK).body(classroomEntity.getStudents());
-    }
-    else{
+    } else {
       return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("message", "Classroom not found"));
     }
   }
 
   public ResponseEntity<Object> leaveClassroom(LeaveClassroomModel leaveClassroomModel) {
+    try {
+      Optional<ClassroomEntity> classroomEntityOptional = classroomRepository.findById(leaveClassroomModel.getClassroomId());
+      if (classroomEntityOptional.isEmpty()) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("message", "Classroom not found"));
+      }
+      ClassroomEntity classroomEntity = classroomEntityOptional.get();
+      Optional<UserEntity> userEntityOptional = userRepository.findByEmail(leaveClassroomModel.getEmail());
+      if (userEntityOptional.isEmpty()) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("message", "User not found"));
+      }
+      UserEntity userEntity = userEntityOptional.get();
+      if (classroomEntity.getCreator() == userEntity) {
+        return deleteClassroom(classroomEntity);
+      }
+      List<ClassroomEntity> tempClasses = userEntity.getClassroom();
+      tempClasses.remove(classroomEntity);
+      userEntity.setClassroom(tempClasses);
+      userRepository.save(userEntity);
+      List<UserEntity> tempUsers;
+      if (classroomEntity.getStudents().contains(userEntity)) {
+        tempUsers = classroomEntity.getStudents();
+        tempUsers.remove(userEntity);
+        classroomEntity.setStudents(tempUsers);
+      } else {
+        tempUsers = classroomEntity.getTeachers();
+        tempUsers.remove(userEntity);
+        classroomEntity.setTeachers(tempUsers);
+      }
+      classroomRepository.save(classroomEntity);
+      return ResponseEntity.status(HttpStatus.OK).body(Map.of("message", "Left the classroom successfully"));
+    } catch (Exception e) {
+      e.printStackTrace();
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("message", "Couldn't leave the classroom"));
+    }
+  }
 
-    return null;
+  public ResponseEntity<Object> removeClassroom(LeaveClassroomModel leaveClassroomModel) {
+    Optional<ClassroomEntity> classroomEntityOptional = classroomRepository.findById(leaveClassroomModel.getClassroomId());
+    if (classroomEntityOptional.isEmpty()) {
+      return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("message", "Classroom not found"));
+    }
+    ClassroomEntity classroomEntity = classroomEntityOptional.get();
+    Optional<UserEntity> userEntityOptional = userRepository.findByEmail(leaveClassroomModel.getEmail());
+    if (userEntityOptional.isEmpty()) {
+      return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("message", "User not found"));
+    }
+    UserEntity userEntity = userEntityOptional.get();
+    if (classroomEntity.getCreator() == userEntity) {
+      return deleteClassroom(classroomEntity);
+    }
+    else{
+      return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("message", "Only creator can remove a classroom"));
+    }
+  }
+
+  private ResponseEntity<Object> deleteClassroom(ClassroomEntity classroomEntity) {
+    List<UserEntity> tempUsers = userRepository.findUserEntitiesByClassroomContains(classroomEntity);
+    tempUsers.forEach(tempUser -> {
+      tempUser.getClassroom().remove(classroomEntity);
+      userRepository.save(tempUser);
+    });
+    classroomRepository.delete(classroomEntity);
+    return ResponseEntity.status(HttpStatus.OK).body(Map.of("message", "Classroom has been deleted successfully"));
   }
 }
