@@ -1,7 +1,6 @@
 package com.glcl.backend.Entity;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -10,40 +9,34 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.Reference;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-import java.util.List;
+import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.Objects;
 
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Document(collection = "classrooms")
-public class ClassroomEntity {
+@Document(collection = "assignment")
+public class AssignmentEntity {
   @Id
   private String id;
-  private String classroomName;
-  private String code;
+  private String title;
+  private String description;
+  private LocalDateTime createdAt;
+  private LocalDateTime deadline;
   @JsonBackReference
   @Reference(UserEntity.class)
-  private List<UserEntity> teachers;
+  private UserEntity createdBy;
   @JsonBackReference
-  @Reference(UserEntity.class)
-  private List<UserEntity> students;
-  @JsonBackReference
-  @Reference(UserEntity.class)
-  private UserEntity creator;
-  @JsonBackReference
-  @Reference(AssignmentEntity.class)
-  private List<AssignmentEntity> assignments;
-  @JsonBackReference
-  @Reference(SubmissionEntity.class)
-  private List<SubmissionEntity> submissions;
+  @Reference(ClassroomEntity.class)
+  private ClassroomEntity classroom;
 
   @Override
   public boolean equals(Object o) {
     if (this == o) return true;
     if (o == null || getClass() != o.getClass()) return false;
-    ClassroomEntity that = (ClassroomEntity) o;
+    AssignmentEntity that = (AssignmentEntity) o;
     return id.equals(that.id); // Compare only by ID
   }
 

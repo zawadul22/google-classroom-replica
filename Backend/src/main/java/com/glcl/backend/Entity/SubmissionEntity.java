@@ -10,40 +10,31 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.Reference;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-import java.util.List;
+import java.time.LocalDateTime;
 import java.util.Objects;
 
 @Data
-@Builder
-@NoArgsConstructor
 @AllArgsConstructor
-@Document(collection = "classrooms")
-public class ClassroomEntity {
+@NoArgsConstructor
+@Builder
+@Document(collection = "submissions")
+public class SubmissionEntity {
   @Id
   private String id;
-  private String classroomName;
-  private String code;
-  @JsonBackReference
-  @Reference(UserEntity.class)
-  private List<UserEntity> teachers;
-  @JsonBackReference
-  @Reference(UserEntity.class)
-  private List<UserEntity> students;
-  @JsonBackReference
-  @Reference(UserEntity.class)
-  private UserEntity creator;
   @JsonBackReference
   @Reference(AssignmentEntity.class)
-  private List<AssignmentEntity> assignments;
-  @JsonBackReference
-  @Reference(SubmissionEntity.class)
-  private List<SubmissionEntity> submissions;
+  private AssignmentEntity assignment;
+  @JsonManagedReference
+  @Reference(UserEntity.class)
+  private UserEntity user;
+  private LocalDateTime submissionDate;
+  private boolean lateSubmission;
 
   @Override
   public boolean equals(Object o) {
     if (this == o) return true;
     if (o == null || getClass() != o.getClass()) return false;
-    ClassroomEntity that = (ClassroomEntity) o;
+    SubmissionEntity that = (SubmissionEntity) o;
     return id.equals(that.id); // Compare only by ID
   }
 
