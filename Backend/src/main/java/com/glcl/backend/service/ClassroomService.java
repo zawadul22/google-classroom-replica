@@ -31,27 +31,30 @@ public class ClassroomService {
       List<UserEntity> teacher = new ArrayList<>();
       teacher.add(userEntity);
       ClassroomEntity classroomEntity = ClassroomEntity.builder()
-              .classroomName(classroomModel.getClassroomName())
-              .teachers(teacher)
-              .code(classroomUtils.codeGenerate())
-              .creator(userEntity)
-              .build();
+          .classroomName(classroomModel.getClassroomName())
+          .teachers(teacher)
+          .code(classroomUtils.codeGenerate())
+          .creator(userEntity)
+          .build();
       classroomRepository.save(classroomEntity);
       ClassroomEntity tempClassroomEntity = classroomRepository.findByClassroomName(classroomModel.getClassroomName());
       List<ClassroomEntity> classroomEntities = userEntity.getClassroom();
       classroomEntities.add(tempClassroomEntity);
       userEntity.setClassroom(classroomEntities);
       userRepository.save(userEntity);
-      return ResponseEntity.ok().build();
+      return ResponseEntity.status(HttpStatus.CREATED).body(Map.of("message", "Classroom created successfully"));
     } catch (Exception e) {
-      throw new RuntimeException(e);
+      e.printStackTrace();
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+          .body(Map.of("message", "Error creating classroom"));
     }
   }
 
   public ResponseEntity<Object> addUser(AddDeleteUserModel addDeleteUserModel) {
     try {
       int flag = 0;
-      Optional<ClassroomEntity> classroomEntityOptional = classroomRepository.findById(addDeleteUserModel.getClassroomId());
+      Optional<ClassroomEntity> classroomEntityOptional = classroomRepository
+          .findById(addDeleteUserModel.getClassroomId());
       ClassroomEntity classroomEntity = new ClassroomEntity();
       if (classroomEntityOptional.isPresent()) {
         classroomEntity = classroomEntityOptional.get();
@@ -78,7 +81,8 @@ public class ClassroomService {
         }
       }
       if (flag == 1) {
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("message", "Couldn't add because user/s already exist/s in classroom"));
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+            .body(Map.of("message", "Couldn't add because user/s already exist/s in classroom"));
       } else if (flag == 2) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("message", "User/s don't exist"));
       }
@@ -108,10 +112,11 @@ public class ClassroomService {
           userRepository.save(user);
         });
       }
-      return ResponseEntity.status(HttpStatus.OK).body(Map.of("message", addDeleteUserModel.getType() + " have been added successfully"));
+      return ResponseEntity.status(HttpStatus.OK)
+          .body(Map.of("message", addDeleteUserModel.getType() + " have been added successfully"));
     } catch (Exception e) {
       e.printStackTrace();
-      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("message", "Couldn't add because user/s"));
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("message", "Error adding users"));
     }
   }
 
@@ -124,7 +129,8 @@ public class ClassroomService {
       } else {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("message", "User not found"));
       }
-      Optional<ClassroomEntity> classroomEntityOptional = classroomRepository.findClassroomEntityByCode(joinByCodeModel.code);
+      Optional<ClassroomEntity> classroomEntityOptional = classroomRepository
+          .findClassroomEntityByCode(joinByCodeModel.code);
       ClassroomEntity classroomEntity = new ClassroomEntity();
       if (classroomEntityOptional.isPresent()) {
         classroomEntity = classroomEntityOptional.get();
@@ -132,7 +138,8 @@ public class ClassroomService {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("message", "Classroom not found"));
       }
       if (userEntity.getClassroom().contains(classroomEntity)) {
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("message", "Already exists in this classroom"));
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+            .body(Map.of("message", "Already exists in this classroom"));
       }
       List<ClassroomEntity> classroomEntities = userEntity.getClassroom();
       classroomEntities.add(classroomEntity);
@@ -145,7 +152,8 @@ public class ClassroomService {
       return ResponseEntity.status(HttpStatus.OK).body(Map.of("message", "Successfully joined the classroom"));
     } catch (Exception e) {
       e.printStackTrace();
-      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("message", "Couldn't join the classroom"));
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+          .body(Map.of("message", "Couldn't join the classroom"));
     }
   }
 
@@ -171,7 +179,8 @@ public class ClassroomService {
 
   public ResponseEntity<Object> leaveClassroom(LeaveClassroomModel leaveClassroomModel) {
     try {
-      Optional<ClassroomEntity> classroomEntityOptional = classroomRepository.findById(leaveClassroomModel.getClassroomId());
+      Optional<ClassroomEntity> classroomEntityOptional = classroomRepository
+          .findById(leaveClassroomModel.getClassroomId());
       if (classroomEntityOptional.isEmpty()) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("message", "Classroom not found"));
       }
@@ -202,12 +211,14 @@ public class ClassroomService {
       return ResponseEntity.status(HttpStatus.OK).body(Map.of("message", "Left the classroom successfully"));
     } catch (Exception e) {
       e.printStackTrace();
-      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("message", "Couldn't leave the classroom"));
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+          .body(Map.of("message", "Couldn't leave the classroom"));
     }
   }
 
   public ResponseEntity<Object> removeClassroom(LeaveClassroomModel leaveClassroomModel) {
-    Optional<ClassroomEntity> classroomEntityOptional = classroomRepository.findById(leaveClassroomModel.getClassroomId());
+    Optional<ClassroomEntity> classroomEntityOptional = classroomRepository
+        .findById(leaveClassroomModel.getClassroomId());
     if (classroomEntityOptional.isEmpty()) {
       return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("message", "Classroom not found"));
     }
@@ -219,9 +230,9 @@ public class ClassroomService {
     UserEntity userEntity = userEntityOptional.get();
     if (classroomEntity.getCreator() == userEntity) {
       return deleteClassroom(classroomEntity);
-    }
-    else{
-      return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("message", "Only creator can remove a classroom"));
+    } else {
+      return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+          .body(Map.of("message", "Only creator can remove a classroom"));
     }
   }
 

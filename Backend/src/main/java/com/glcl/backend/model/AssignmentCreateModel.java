@@ -7,15 +7,17 @@ import lombok.RequiredArgsConstructor;
 
 import java.time.LocalDateTime;
 
+import org.springframework.web.multipart.MultipartFile;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@RequiredArgsConstructor
 public class AssignmentCreateModel {
   private String title;
   private String description;
-  private LocalDateTime createdAt;
-  private LocalDateTime deadline;
+  // private LocalDateTime createdAt;
+  private String deadline;
   private String createdBy;
   private String classroomId;
+  // private MultipartFile file;
 }
