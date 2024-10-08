@@ -15,9 +15,8 @@ import org.springframework.web.multipart.MultipartFile;
 public class AssignmentCreateModel {
   private String title;
   private String description;
-  // private LocalDateTime createdAt;
+  private String createdAt;
   private String deadline;
   private String createdBy;
   private String classroomId;
-  // private MultipartFile file;
 }

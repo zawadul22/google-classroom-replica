@@ -26,9 +26,8 @@ public class AssignmentEntity {
   private String id;
   private String title;
   private String description;
-  @CreatedDate
-  private LocalDateTime createdAt;
-  private LocalDateTime deadline;
+  private String createdAt;
+  private String deadline;
   private Binary file;
   @JsonBackReference
   @Reference(UserEntity.class)
