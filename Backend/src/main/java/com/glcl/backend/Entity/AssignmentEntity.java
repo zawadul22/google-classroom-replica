@@ -14,6 +14,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Objects;
 
 @Data
@@ -35,6 +36,9 @@ public class AssignmentEntity {
   @JsonBackReference
   @Reference(ClassroomEntity.class)
   private ClassroomEntity classroom;
+  @JsonBackReference
+  @Reference(SubmissionEntity.class)
+  private List<SubmissionEntity> submissions;
 
   @Override
   public boolean equals(Object o) {

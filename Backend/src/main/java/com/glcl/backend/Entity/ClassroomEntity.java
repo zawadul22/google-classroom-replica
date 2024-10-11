@@ -35,9 +35,9 @@ public class ClassroomEntity {
   @JsonBackReference
   @Reference(AssignmentEntity.class)
   private List<AssignmentEntity> assignments;
-  @JsonBackReference
-  @Reference(SubmissionEntity.class)
-  private List<SubmissionEntity> submissions;
+//  @JsonBackReference
+//  @Reference(SubmissionEntity.class)
+//  private List<SubmissionEntity> submissions;
 
   @Override
   public boolean equals(Object o) {

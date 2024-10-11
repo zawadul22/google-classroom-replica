@@ -6,7 +6,9 @@ import com.glcl.backend.model.AddDeleteUserModel;
 import com.glcl.backend.model.ClassroomCreateModel;
 import com.glcl.backend.model.JoinByCodeModel;
 import com.glcl.backend.model.LeaveClassroomModel;
+import com.glcl.backend.repository.AssignmentRepository;
 import com.glcl.backend.repository.ClassroomRepository;
+import com.glcl.backend.repository.SubmissionRepository;
 import com.glcl.backend.repository.UserRepository;
 import com.glcl.backend.utils.ClassroomUtils;
 import lombok.RequiredArgsConstructor;
@@ -22,6 +24,8 @@ public class ClassroomService {
   private final ClassroomRepository classroomRepository;
   private final UserRepository userRepository;
   private final ClassroomUtils classroomUtils;
+  private final SubmissionRepository submissionRepository;
+  private final AssignmentRepository assignmentRepository;
 
   public ResponseEntity<Object> createClass(ClassroomCreateModel classroomModel) {
     try {
@@ -31,11 +35,11 @@ public class ClassroomService {
       List<UserEntity> teacher = new ArrayList<>();
       teacher.add(userEntity);
       ClassroomEntity classroomEntity = ClassroomEntity.builder()
-          .classroomName(classroomModel.getClassroomName())
-          .teachers(teacher)
-          .code(classroomUtils.codeGenerate())
-          .creator(userEntity)
-          .build();
+              .classroomName(classroomModel.getClassroomName())
+              .teachers(teacher)
+              .code(classroomUtils.codeGenerate())
+              .creator(userEntity)
+              .build();
       classroomRepository.save(classroomEntity);
       ClassroomEntity tempClassroomEntity = classroomRepository.findByClassroomName(classroomModel.getClassroomName());
       List<ClassroomEntity> classroomEntities = userEntity.getClassroom();
@@ -46,7 +50,7 @@ public class ClassroomService {
     } catch (Exception e) {
       e.printStackTrace();
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-          .body(Map.of("message", "Error creating classroom"));
+              .body(Map.of("message", "Error creating classroom"));
     }
   }
 
@@ -54,7 +58,7 @@ public class ClassroomService {
     try {
       int flag = 0;
       Optional<ClassroomEntity> classroomEntityOptional = classroomRepository
-          .findById(addDeleteUserModel.getClassroomId());
+              .findById(addDeleteUserModel.getClassroomId());
       ClassroomEntity classroomEntity = new ClassroomEntity();
       if (classroomEntityOptional.isPresent()) {
         classroomEntity = classroomEntityOptional.get();
@@ -82,7 +86,7 @@ public class ClassroomService {
       }
       if (flag == 1) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-            .body(Map.of("message", "Couldn't add because user/s already exist/s in classroom"));
+                .body(Map.of("message", "Couldn't add because user/s already exist/s in classroom"));
       } else if (flag == 2) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("message", "User/s don't exist"));
       }
@@ -113,7 +117,7 @@ public class ClassroomService {
         });
       }
       return ResponseEntity.status(HttpStatus.OK)
-          .body(Map.of("message", addDeleteUserModel.getType() + " have been added successfully"));
+              .body(Map.of("message", addDeleteUserModel.getType() + " have been added successfully"));
     } catch (Exception e) {
       e.printStackTrace();
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("message", "Error adding users"));
@@ -130,7 +134,7 @@ public class ClassroomService {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("message", "User not found"));
       }
       Optional<ClassroomEntity> classroomEntityOptional = classroomRepository
-          .findClassroomEntityByCode(joinByCodeModel.code);
+              .findClassroomEntityByCode(joinByCodeModel.code);
       ClassroomEntity classroomEntity = new ClassroomEntity();
       if (classroomEntityOptional.isPresent()) {
         classroomEntity = classroomEntityOptional.get();
@@ -139,7 +143,7 @@ public class ClassroomService {
       }
       if (userEntity.getClassroom().contains(classroomEntity)) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-            .body(Map.of("message", "Already exists in this classroom"));
+                .body(Map.of("message", "Already exists in this classroom"));
       }
       List<ClassroomEntity> classroomEntities = userEntity.getClassroom();
       classroomEntities.add(classroomEntity);
@@ -153,7 +157,7 @@ public class ClassroomService {
     } catch (Exception e) {
       e.printStackTrace();
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-          .body(Map.of("message", "Couldn't join the classroom"));
+              .body(Map.of("message", "Couldn't join the classroom"));
     }
   }
 
@@ -180,7 +184,7 @@ public class ClassroomService {
   public ResponseEntity<Object> leaveClassroom(LeaveClassroomModel leaveClassroomModel) {
     try {
       Optional<ClassroomEntity> classroomEntityOptional = classroomRepository
-          .findById(leaveClassroomModel.getClassroomId());
+              .findById(leaveClassroomModel.getClassroomId());
       if (classroomEntityOptional.isEmpty()) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("message", "Classroom not found"));
       }
@@ -212,13 +216,13 @@ public class ClassroomService {
     } catch (Exception e) {
       e.printStackTrace();
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-          .body(Map.of("message", "Couldn't leave the classroom"));
+              .body(Map.of("message", "Couldn't leave the classroom"));
     }
   }
 
   public ResponseEntity<Object> removeClassroom(LeaveClassroomModel leaveClassroomModel) {
     Optional<ClassroomEntity> classroomEntityOptional = classroomRepository
-        .findById(leaveClassroomModel.getClassroomId());
+            .findById(leaveClassroomModel.getClassroomId());
     if (classroomEntityOptional.isEmpty()) {
       return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("message", "Classroom not found"));
     }
@@ -232,7 +236,7 @@ public class ClassroomService {
       return deleteClassroom(classroomEntity);
     } else {
       return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-          .body(Map.of("message", "Only creator can remove a classroom"));
+              .body(Map.of("message", "Only creator can remove a classroom"));
     }
   }
 
@@ -241,6 +245,10 @@ public class ClassroomService {
     tempUsers.forEach(tempUser -> {
       tempUser.getClassroom().remove(classroomEntity);
       userRepository.save(tempUser);
+    });
+    classroomEntity.getAssignments().forEach(assignment -> {
+      submissionRepository.deleteAll(assignment.getSubmissions());
+      assignmentRepository.delete(assignment);
     });
     classroomRepository.delete(classroomEntity);
     return ResponseEntity.status(HttpStatus.OK).body(Map.of("message", "Classroom has been deleted successfully"));

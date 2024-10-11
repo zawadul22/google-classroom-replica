@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.bson.types.Binary;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.Reference;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -29,7 +30,7 @@ public class SubmissionEntity {
   private UserEntity user;
   private LocalDateTime submissionDate;
   private boolean lateSubmission;
-
+  private Binary file;
   @Override
   public boolean equals(Object o) {
     if (this == o) return true;
