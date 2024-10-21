@@ -1,13 +1,11 @@
 package com.glcl.backend.controller;
 
-import com.glcl.backend.model.AddDeleteUserModel;
-import com.glcl.backend.model.ClassroomCreateModel;
-import com.glcl.backend.model.JoinByCodeModel;
-import com.glcl.backend.model.LeaveClassroomModel;
+import com.glcl.backend.model.*;
 import com.glcl.backend.service.ClassroomService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequiredArgsConstructor
@@ -52,7 +50,12 @@ public class ClassroomController {
   }
 
   @DeleteMapping(value = "/removeClassroom")
-  public ResponseEntity<Object> removeClassroomController(@RequestBody LeaveClassroomModel leaveClassroomModel){
+  public ResponseEntity<Object> removeClassroomController(@RequestBody LeaveClassroomModel leaveClassroomModel) {
     return classroomService.removeClassroom(leaveClassroomModel);
+  }
+
+  @PostMapping(value = "/post/create")
+  public ResponseEntity<Object> postCreateController(@RequestPart("body") CreatePostModel createPostModel, @RequestPart("file") MultipartFile file) {
+    return classroomService.createPost(createPostModel, file);
   }
 }

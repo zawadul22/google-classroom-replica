@@ -1,20 +1,18 @@
 package com.glcl.backend.service;
 
 import com.glcl.backend.Entity.ClassroomEntity;
+import com.glcl.backend.Entity.PostEntity;
 import com.glcl.backend.Entity.UserEntity;
-import com.glcl.backend.model.AddDeleteUserModel;
-import com.glcl.backend.model.ClassroomCreateModel;
-import com.glcl.backend.model.JoinByCodeModel;
-import com.glcl.backend.model.LeaveClassroomModel;
-import com.glcl.backend.repository.AssignmentRepository;
-import com.glcl.backend.repository.ClassroomRepository;
-import com.glcl.backend.repository.SubmissionRepository;
-import com.glcl.backend.repository.UserRepository;
+import com.glcl.backend.model.*;
+import com.glcl.backend.repository.*;
 import com.glcl.backend.utils.ClassroomUtils;
 import lombok.RequiredArgsConstructor;
+import org.bson.BsonBinarySubType;
+import org.bson.types.Binary;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.*;
 
@@ -26,6 +24,7 @@ public class ClassroomService {
   private final ClassroomUtils classroomUtils;
   private final SubmissionRepository submissionRepository;
   private final AssignmentRepository assignmentRepository;
+  private final PostRepository postRepository;
 
   public ResponseEntity<Object> createClass(ClassroomCreateModel classroomModel) {
     try {
@@ -253,4 +252,64 @@ public class ClassroomService {
     classroomRepository.delete(classroomEntity);
     return ResponseEntity.status(HttpStatus.OK).body(Map.of("message", "Classroom has been deleted successfully"));
   }
+
+  public ResponseEntity<Object> createPost(CreatePostModel createPostModel, MultipartFile file) {
+    try {
+      Optional<UserEntity> userEntityOptional = userRepository.findByEmail(createPostModel.getEmail());
+      if (userEntityOptional.isEmpty()) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("message", "User not found"));
+      }
+      UserEntity userEntity = userEntityOptional.get();
+      Optional<ClassroomEntity> classroomEntityOptional = classroomRepository.findById(createPostModel.getClassroomId());
+      if (classroomEntityOptional.isEmpty()) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("message", "Classroom not found"));
+      }
+      ClassroomEntity classroomEntity = classroomEntityOptional.get();
+      if (!classroomEntity.getStudents().contains(userEntity) && !classroomEntity.getTeachers().contains(userEntity)) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("message", "The user does not exist in the given classroom"));
+      }
+      PostEntity postEntity = PostEntity.builder()
+              .post(createPostModel.getPost())
+              .classroom(classroomEntity)
+              .creator(userEntity)
+              .file(file.isEmpty() ? null : new Binary(BsonBinarySubType.BINARY, file.getBytes()))
+              .build();
+      postRepository.save(postEntity);
+      return ResponseEntity.status(HttpStatus.OK).body(Map.of("message", "Post has been created successfully"));
+    } catch (Exception e) {
+      e.printStackTrace();
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("message", "Couldn't create post"));
+    }
+  }
+
+  public ResponseEntity<Object> updatePost (UpdatePostModel updatePostModel){
+    Optional<PostEntity> postEntityOptional = postRepository.findById(updatePostModel.getPostId());
+    if(postEntityOptional.isEmpty()){
+      return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("message", "Post not found"));
+    }
+    PostEntity postEntity = postEntityOptional.get();
+    Optional<UserEntity> userEntityOptional = userRepository.findByEmail(updatePostModel.getPostId());
+    if (userEntityOptional.isEmpty()) {
+      return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("message", "User not found"));
+    }
+    UserEntity userEntity = userEntityOptional.get();
+    if(updatePostModel.isDelete()){
+      ClassroomEntity classroomEntity = postEntity.getClassroom();
+      if(postEntity.getCreator() == userEntity || classroomEntity.getCreator() == userEntity){
+        postRepository.delete(postEntity);
+        return ResponseEntity.status(HttpStatus.OK).body(Map.of("message", "Post has been deleted successfully"));
+      }
+
+    }
+    if(postEntity.getCreator() != userEntity){
+      return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("message", "Only creator can update his/her post"));
+    }
+    postEntity.setPost(updatePostModel.getDescription());
+    postRepository.save(postEntity);
+    return ResponseEntity.status(HttpStatus.OK).body(Map.of("message", "Post has been updated successfully"));
+  }
+
+//  public ResponseEntity<Object> deletePost(UpdatePostModel updatePostModel){
+//
+//  }
 }
