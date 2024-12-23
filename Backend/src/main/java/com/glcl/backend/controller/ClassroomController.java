@@ -1,6 +1,11 @@
 package com.glcl.backend.controller;
 
 import com.glcl.backend.model.*;
+import com.glcl.backend.model.classroomModel.ClassroomCreateModel;
+import com.glcl.backend.model.classroomModel.JoinByCodeModel;
+import com.glcl.backend.model.classroomModel.LeaveClassroomModel;
+import com.glcl.backend.model.postModel.CreatePostModel;
+import com.glcl.backend.model.postModel.UpdatePostModel;
 import com.glcl.backend.service.ClassroomService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -57,5 +62,20 @@ public class ClassroomController {
   @PostMapping(value = "/post/create")
   public ResponseEntity<Object> postCreateController(@RequestPart("body") CreatePostModel createPostModel, @RequestPart("file") MultipartFile file) {
     return classroomService.createPost(createPostModel, file);
+  }
+
+  @PatchMapping(value = "/post/update")
+  public ResponseEntity<Object> postUpdateController(@RequestPart("body") UpdatePostModel updatePostModel, @RequestPart("file") MultipartFile file) {
+    return classroomService.updatePost(updatePostModel, file);
+  }
+
+  @DeleteMapping(value = "/post/delete")
+  public ResponseEntity<Object> postDeleteController(@RequestBody UpdatePostModel updatePostModel) {
+    return classroomService.deletePost(updatePostModel);
+  }
+
+  @GetMapping(value = "/post/get/{classroomId}")
+  public ResponseEntity<Object> getPostController(@PathVariable("classroomId") String classroomId) {
+    return classroomService.getPosts(classroomId);
   }
 }

@@ -1,8 +1,8 @@
 package com.glcl.backend.service;
 
-import com.glcl.backend.model.AssignmentCreateModel;
-import com.glcl.backend.model.AssignmentSubmitModel;
-import com.glcl.backend.model.DeleteSubmissionModel;
+import com.glcl.backend.model.assignmentModel.AssignmentCreateModel;
+import com.glcl.backend.model.assignmentModel.AssignmentSubmitModel;
+import com.glcl.backend.model.assignmentModel.DeleteSubmissionModel;
 import com.glcl.backend.repository.AssignmentRepository;
 import com.glcl.backend.repository.ClassroomRepository;
 import com.glcl.backend.repository.SubmissionRepository;
@@ -13,14 +13,12 @@ import com.glcl.backend.Entity.*;
 
 import java.time.LocalDateTime;
 
-import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 import org.bson.BsonBinarySubType;
 import org.bson.types.Binary;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;

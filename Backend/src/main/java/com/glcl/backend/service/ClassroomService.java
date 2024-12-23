@@ -4,16 +4,26 @@ import com.glcl.backend.Entity.ClassroomEntity;
 import com.glcl.backend.Entity.PostEntity;
 import com.glcl.backend.Entity.UserEntity;
 import com.glcl.backend.model.*;
+import com.glcl.backend.model.classroomModel.ClassroomCreateModel;
+import com.glcl.backend.model.classroomModel.JoinByCodeModel;
+import com.glcl.backend.model.classroomModel.LeaveClassroomModel;
+import com.glcl.backend.model.postModel.CreatePostModel;
+import com.glcl.backend.model.postModel.GetPostModel;
+import com.glcl.backend.model.postModel.UpdatePostModel;
 import com.glcl.backend.repository.*;
 import com.glcl.backend.utils.ClassroomUtils;
+import com.mongodb.client.gridfs.GridFSBucket;
+import com.mongodb.client.gridfs.model.GridFSFile;
 import lombok.RequiredArgsConstructor;
-import org.bson.BsonBinarySubType;
-import org.bson.types.Binary;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.data.mongodb.gridfs.GridFsTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.InputStream;
 import java.util.*;
 
 @Service
@@ -25,6 +35,8 @@ public class ClassroomService {
   private final SubmissionRepository submissionRepository;
   private final AssignmentRepository assignmentRepository;
   private final PostRepository postRepository;
+  private final GridFsTemplate gridFsTemplate;
+  private final GridFSBucket gridFSBucket;
 
   public ResponseEntity<Object> createClass(ClassroomCreateModel classroomModel) {
     try {
@@ -272,7 +284,8 @@ public class ClassroomService {
               .post(createPostModel.getPost())
               .classroom(classroomEntity)
               .creator(userEntity)
-              .file(file.isEmpty() ? null : new Binary(BsonBinarySubType.BINARY, file.getBytes()))
+//              .file(file.isEmpty() ? null : new Binary(BsonBinarySubType.BINARY, file.getBytes()))
+              .file(file.isEmpty() ? null : gridFsTemplate.store(file.getInputStream(), file.getOriginalFilename(), file.getContentType()).toString())
               .build();
       postRepository.save(postEntity);
       return ResponseEntity.status(HttpStatus.OK).body(Map.of("message", "Post has been created successfully"));
@@ -282,34 +295,104 @@ public class ClassroomService {
     }
   }
 
-  public ResponseEntity<Object> updatePost (UpdatePostModel updatePostModel){
-    Optional<PostEntity> postEntityOptional = postRepository.findById(updatePostModel.getPostId());
-    if(postEntityOptional.isEmpty()){
-      return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("message", "Post not found"));
-    }
-    PostEntity postEntity = postEntityOptional.get();
-    Optional<UserEntity> userEntityOptional = userRepository.findByEmail(updatePostModel.getPostId());
-    if (userEntityOptional.isEmpty()) {
-      return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("message", "User not found"));
-    }
-    UserEntity userEntity = userEntityOptional.get();
-    if(updatePostModel.isDelete()){
-      ClassroomEntity classroomEntity = postEntity.getClassroom();
-      if(postEntity.getCreator() == userEntity || classroomEntity.getCreator() == userEntity){
-        postRepository.delete(postEntity);
-        return ResponseEntity.status(HttpStatus.OK).body(Map.of("message", "Post has been deleted successfully"));
+  public ResponseEntity<Object> updatePost(UpdatePostModel updatePostModel, MultipartFile file) {
+    try {
+      Optional<PostEntity> postEntityOptional = postRepository.findById(updatePostModel.getPostId());
+      if (postEntityOptional.isEmpty()) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("message", "Post not found"));
       }
-
+      PostEntity postEntity = postEntityOptional.get();
+      Optional<UserEntity> userEntityOptional = userRepository.findByEmail(updatePostModel.getEmail());
+      if (userEntityOptional.isEmpty()) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("message", "User not found"));
+      }
+      UserEntity userEntity = userEntityOptional.get();
+      if (!postEntity.getCreator().equals(userEntity)) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("message", "Only creator can update his/her post"));
+      }
+      if (!updatePostModel.getDescription().isEmpty()) {
+        postEntity.setPost(updatePostModel.getDescription());
+        postRepository.save(postEntity);
+      }
+      if (!file.isEmpty()) {
+//        postEntity.setFile(new Binary(BsonBinarySubType.BINARY, file.getBytes()));
+        postEntity.setFile(gridFsTemplate.store(file.getInputStream(), file.getOriginalFilename(), file.getContentType()).toString());
+        postRepository.save(postEntity);
+      }
+      return ResponseEntity.status(HttpStatus.OK).body(Map.of("message", "Post has been updated successfully"));
+    } catch (Exception e) {
+      e.printStackTrace();
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("message", "Couldn't update post"));
     }
-    if(postEntity.getCreator() != userEntity){
-      return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("message", "Only creator can update his/her post"));
-    }
-    postEntity.setPost(updatePostModel.getDescription());
-    postRepository.save(postEntity);
-    return ResponseEntity.status(HttpStatus.OK).body(Map.of("message", "Post has been updated successfully"));
   }
 
-//  public ResponseEntity<Object> deletePost(UpdatePostModel updatePostModel){
-//
-//  }
+  public ResponseEntity<Object> deletePost(UpdatePostModel updatePostModel) {
+    try {
+      Optional<PostEntity> postEntityOptional = postRepository.findById(updatePostModel.getPostId());
+      if (postEntityOptional.isEmpty()) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("message", "Post not found"));
+      }
+      PostEntity postEntity = postEntityOptional.get();
+      Optional<UserEntity> userEntityOptional = userRepository.findByEmail(updatePostModel.getEmail());
+      if (userEntityOptional.isEmpty()) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("message", "User not found"));
+      }
+      UserEntity userEntity = userEntityOptional.get();
+      ClassroomEntity classroomEntity = postEntity.getClassroom();
+      if (postEntity.getCreator().equals(userEntity) || classroomEntity.getCreator().equals(userEntity)) {
+        postRepository.delete(postEntity);
+        return ResponseEntity.status(HttpStatus.OK).body(Map.of("message", "Post has been deleted successfully"));
+      } else {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("message", "Only classroom or post creator can remove a post"));
+      }
+    } catch (Exception e) {
+      e.printStackTrace();
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("message", "Couldn't delete post"));
+    }
+  }
+
+  public ResponseEntity<Object> getPosts(String classroomId) {
+    try {
+      Optional<ClassroomEntity> classroomEntityOptional = classroomRepository.findById(classroomId);
+      if (classroomEntityOptional.isEmpty()) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("message", "Classroom not found"));
+      }
+      ClassroomEntity classroomEntity = classroomEntityOptional.get();
+      List<PostEntity> postEntities = new ArrayList<>();
+      postEntities = postRepository.getPostEntitiesByClassroom(classroomEntity);
+      List<GetPostModel> postModels = new ArrayList<>();
+      postModels = postEntities.stream()
+              .map(postEntity -> {
+                GridFSFile gridFSFile = gridFsTemplate.findOne(new Query(Criteria.where("_id").is(postEntity.getFile())));
+                GetPostModel getPostModel = new GetPostModel();
+                if (gridFSFile == null) {
+                  getPostModel = GetPostModel.builder()
+                          .post(postEntity.getPost())
+                          .creator(postEntity.getCreator().getName())
+                          .build();
+                } else {
+                  try {
+                    InputStream inputStream = gridFSBucket.openDownloadStream(gridFSFile.getObjectId());
+                    byte[] fileData = inputStream.readAllBytes();
+                    getPostModel = GetPostModel.builder()
+                            .post(postEntity.getPost())
+                            .creator(postEntity.getCreator().getName())
+                            .file(fileData)
+                            .build();
+                  } catch (Exception e) {
+                    e.printStackTrace();
+                    getPostModel = GetPostModel.builder()
+                            .post(postEntity.getPost())
+                            .creator(postEntity.getCreator().getName())
+                            .build();
+                  }
+                }
+                return getPostModel;
+              }).toList();
+      return ResponseEntity.status(HttpStatus.OK).body(postModels);
+    } catch (Exception e) {
+      e.printStackTrace();
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("message", "Couldn't get posts"));
+    }
+  }
 }

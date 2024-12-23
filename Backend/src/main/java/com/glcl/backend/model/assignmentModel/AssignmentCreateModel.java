@@ -1,13 +1,8 @@
-package com.glcl.backend.model;
+package com.glcl.backend.model.assignmentModel;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.RequiredArgsConstructor;
-
-import java.time.LocalDateTime;
-
-import org.springframework.web.multipart.MultipartFile;
 
 @Data
 @AllArgsConstructor

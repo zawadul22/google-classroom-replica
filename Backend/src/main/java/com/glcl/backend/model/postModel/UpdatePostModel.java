@@ -1,6 +1,5 @@
-package com.glcl.backend.model;
+package com.glcl.backend.model.postModel;
 
-import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -9,8 +8,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class UpdatePostModel {
-  private int email;
+  private String email;
   private String postId;
   private String description;
-  private boolean delete;
+//  private boolean delete;
 }

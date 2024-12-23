@@ -1,4 +1,4 @@
-package com.glcl.backend.model;
+package com.glcl.backend.model.classroomModel;
 
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;

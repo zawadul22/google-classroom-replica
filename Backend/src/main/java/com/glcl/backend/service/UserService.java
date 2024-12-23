@@ -1,8 +1,7 @@
 package com.glcl.backend.service;
 
-import com.glcl.backend.Entity.ClassroomEntity;
 import com.glcl.backend.Entity.UserEntity;
-import com.glcl.backend.model.GetClassroomModel;
+import com.glcl.backend.model.classroomModel.GetClassroomModel;
 import com.glcl.backend.model.UserModel;
 import com.glcl.backend.repository.ClassroomRepository;
 import com.glcl.backend.repository.UserRepository;
@@ -14,7 +13,6 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor

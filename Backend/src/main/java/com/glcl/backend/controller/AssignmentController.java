@@ -1,12 +1,12 @@
 package com.glcl.backend.controller;
 
-import com.glcl.backend.model.AssignmentSubmitModel;
-import com.glcl.backend.model.DeleteSubmissionModel;
+import com.glcl.backend.model.assignmentModel.AssignmentSubmitModel;
+import com.glcl.backend.model.assignmentModel.DeleteSubmissionModel;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.glcl.backend.model.AssignmentCreateModel;
+import com.glcl.backend.model.assignmentModel.AssignmentCreateModel;
 import com.glcl.backend.service.AssignmentService;
 
 import lombok.RequiredArgsConstructor;
