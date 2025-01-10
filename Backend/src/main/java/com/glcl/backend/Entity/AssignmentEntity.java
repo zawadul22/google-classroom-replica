@@ -29,7 +29,8 @@ public class AssignmentEntity {
   private String description;
   private String createdAt;
   private String deadline;
-  private Binary file;
+//  private Binary file;
+  private String file;
   @JsonBackReference
   @Reference(UserEntity.class)
   private UserEntity createdBy;

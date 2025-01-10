@@ -1,7 +1,6 @@
 package com.glcl.backend.controller;
 
-import com.glcl.backend.Entity.UserEntity;
-import com.glcl.backend.model.UserModel;
+import com.glcl.backend.model.userModel.UserModel;
 import com.glcl.backend.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;

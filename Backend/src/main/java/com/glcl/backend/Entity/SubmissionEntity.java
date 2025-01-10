@@ -30,7 +30,9 @@ public class SubmissionEntity {
   private UserEntity user;
   private LocalDateTime submissionDate;
   private boolean lateSubmission;
-  private Binary file;
+  //  private Binary file;
+  private String file;
+
   @Override
   public boolean equals(Object o) {
     if (this == o) return true;

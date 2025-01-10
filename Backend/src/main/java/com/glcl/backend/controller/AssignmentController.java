@@ -39,4 +39,14 @@ public class AssignmentController {
     public ResponseEntity<Object> assignmentDeleteController(@RequestBody AssignmentSubmitModel assignmentSubmitModel) {
         return assignmentService.deleteAssignment(assignmentSubmitModel);
     }
+
+    @GetMapping("/getAssignments/{classroomId}")
+    public ResponseEntity<Object> getAssignmentsController(@PathVariable String classroomId) {
+        return assignmentService.getAssignments(classroomId);
+    }
+
+    @GetMapping("/getSubmissions/{assignmentId}")
+    public ResponseEntity<Object> getSubmissionsController(@PathVariable String assignmentId) {
+        return assignmentService.getSubmissions(assignmentId);
+    }
 }

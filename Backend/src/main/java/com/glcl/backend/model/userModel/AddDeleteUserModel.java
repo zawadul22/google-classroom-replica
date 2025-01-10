@@ -1,4 +1,4 @@
-package com.glcl.backend.model;
+package com.glcl.backend.model.userModel;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

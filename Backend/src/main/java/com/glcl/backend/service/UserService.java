@@ -2,7 +2,7 @@ package com.glcl.backend.service;
 
 import com.glcl.backend.Entity.UserEntity;
 import com.glcl.backend.model.classroomModel.GetClassroomModel;
-import com.glcl.backend.model.UserModel;
+import com.glcl.backend.model.userModel.UserModel;
 import com.glcl.backend.repository.ClassroomRepository;
 import com.glcl.backend.repository.UserRepository;
 import lombok.RequiredArgsConstructor;

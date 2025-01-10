@@ -1,16 +1,17 @@
 package com.glcl.backend.service;
 
-import com.glcl.backend.model.assignmentModel.AssignmentCreateModel;
-import com.glcl.backend.model.assignmentModel.AssignmentSubmitModel;
-import com.glcl.backend.model.assignmentModel.DeleteSubmissionModel;
+import com.glcl.backend.model.assignmentModel.*;
 import com.glcl.backend.repository.AssignmentRepository;
 import com.glcl.backend.repository.ClassroomRepository;
 import com.glcl.backend.repository.SubmissionRepository;
 import com.glcl.backend.repository.UserRepository;
 import com.glcl.backend.utils.ClassroomUtils;
+import com.mongodb.client.gridfs.GridFSBucket;
+import com.mongodb.client.gridfs.model.GridFSFile;
 import lombok.RequiredArgsConstructor;
 import com.glcl.backend.Entity.*;
 
+import java.io.InputStream;
 import java.time.LocalDateTime;
 
 import java.time.format.DateTimeFormatter;
@@ -18,6 +19,9 @@ import java.util.*;
 
 import org.bson.BsonBinarySubType;
 import org.bson.types.Binary;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.data.mongodb.gridfs.GridFsTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -31,8 +35,10 @@ public class AssignmentService {
   private final AssignmentRepository assignmentRepository;
   private final SubmissionRepository submissionRepository;
   private final ClassroomUtils classroomUtils;
+  private final GridFsTemplate gridFsTemplate;
+  private final GridFSBucket gridFSBucket;
 
-  public ResponseEntity<Object> assignmentCreate(AssignmentCreateModel assignmentCreateModel, MultipartFile multipartFile) {
+  public ResponseEntity<Object> assignmentCreate(AssignmentCreateModel assignmentCreateModel, MultipartFile file) {
     try {
       Optional<UserEntity> userEntityOptional = userRepository.findByEmail(assignmentCreateModel.getCreatedBy());
       if (userEntityOptional.isEmpty()) {
@@ -61,7 +67,8 @@ public class AssignmentService {
               .createdAt(assignmentCreateModel.getCreatedAt())
               .deadline(assignmentCreateModel.getDeadline())
               .description(assignmentCreateModel.getDescription())
-              .file(new Binary(BsonBinarySubType.BINARY, multipartFile.getBytes()))
+//              .file(new Binary(BsonBinarySubType.BINARY, multipartFile.getBytes()))
+              .file(file.isEmpty() ? null : gridFsTemplate.store(file.getInputStream(), file.getOriginalFilename(), file.getContentType()).toString())
               .createdBy(userEntity)
               .build();
       assignmentRepository.save(assignmentEntity);
@@ -70,12 +77,11 @@ public class AssignmentService {
       return ResponseEntity.status(HttpStatus.CREATED).body(Map.of("message", "Assignment created successfully"));
     } catch (Exception e) {
       e.printStackTrace();
-      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-              .body(Map.of("message", "Couldn't create assignment"));
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("message", "Couldn't create assignment"));
     }
   }
 
-  public ResponseEntity<Object> assignmentSubmit(AssignmentSubmitModel assignmentSubmitModel, MultipartFile multipartFile) {
+  public ResponseEntity<Object> assignmentSubmit(AssignmentSubmitModel assignmentSubmitModel, MultipartFile file) {
     try {
       Optional<UserEntity> userEntityOptional = userRepository.findByEmail(assignmentSubmitModel.getStudentEmail());
       if (userEntityOptional.isEmpty()) {
@@ -103,7 +109,8 @@ public class AssignmentService {
               .assignment(assignmentEntity)
               .submissionDate(LocalDateTime.now())
               .lateSubmission(isLate)
-              .file(new Binary(BsonBinarySubType.BINARY, multipartFile.getBytes()))
+//              .file(new Binary(BsonBinarySubType.BINARY, multipartFile.getBytes()))
+              .file(file.isEmpty() ? null : gridFsTemplate.store(file.getInputStream(), file.getOriginalFilename(), file.getContentType()).toString())
               .build();
       submissionRepository.save(submissionEntity);
       assignmentEntity.getSubmissions().add(submissionEntity);
@@ -169,6 +176,74 @@ public class AssignmentService {
     } catch (Exception e) {
       e.printStackTrace();
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("message", "Couldn't delete submission"));
+    }
+  }
+
+  public ResponseEntity<Object> getAssignments(String classroomId) {
+    try {
+      Optional<ClassroomEntity> classroomEntityOptional = classroomRepository.findById(classroomId);
+      if (classroomEntityOptional.isEmpty()) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("message", "Classroom not found"));
+      }
+      ClassroomEntity classroomEntity = classroomEntityOptional.get();
+      List<AssignmentEntity> assignments = classroomEntity.getAssignments();
+      Optional<UserEntity> userEntityOptional = userRepository.findByEmail(classroomEntity.getCreator().getEmail());
+      UserEntity userEntity = new UserEntity();
+      if (userEntityOptional.isPresent()) {
+        userEntity = userEntityOptional.get();
+      }
+      List<GetAssignmentModel> getAssignmentModels = new ArrayList<>();
+      for (AssignmentEntity assignmentEntity : assignments) {
+        GridFSFile gridFSFile = gridFsTemplate.findOne(new Query(Criteria.where("_id").is(assignmentEntity.getFile())));
+        InputStream inputStream = gridFSBucket.openDownloadStream(gridFSFile.getObjectId());
+        byte[] fileData = inputStream.readAllBytes();
+        GetAssignmentModel getAssignmentModel = GetAssignmentModel.builder()
+                .id(assignmentEntity.getId())
+                .title(assignmentEntity.getTitle())
+                .description(assignmentEntity.getDescription())
+                .createdByEmail(userEntity.getEmail())
+                .createdByName(userEntity.getName())
+                .file(fileData)
+                .createdAt(assignmentEntity.getCreatedAt())
+                .deadline(assignmentEntity.getDeadline())
+                .build();
+        getAssignmentModels.add(getAssignmentModel);
+      }
+      return ResponseEntity.status(HttpStatus.OK).body(getAssignmentModels);
+    } catch (Exception e) {
+      e.printStackTrace();
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("message", "Couldn't get assignments"));
+    }
+  }
+
+  public ResponseEntity<Object> getSubmissions(String assignmentId) {
+    try {
+      Optional<AssignmentEntity> assignmentEntityOptional = assignmentRepository.findById(assignmentId);
+      if (assignmentEntityOptional.isEmpty()) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("message", "Assignment not found"));
+      }
+      AssignmentEntity assignmentEntity = assignmentEntityOptional.get();
+      List<SubmissionEntity> submissions = assignmentEntity.getSubmissions();
+      List<GetSubmissionModel> getSubmissionModels = new ArrayList<>();
+      for (SubmissionEntity submissionEntity : submissions) {
+        GridFSFile gridFSFile = gridFsTemplate.findOne(new Query(Criteria.where("_id").is(submissionEntity.getFile())));
+        InputStream inputStream = gridFSBucket.openDownloadStream(gridFSFile.getObjectId());
+        byte[] fileData = inputStream.readAllBytes();
+        UserEntity userEntity = submissionEntity.getUser();
+        GetSubmissionModel getSubmissionModel = GetSubmissionModel.builder()
+                .id(submissionEntity.getId())
+                .submissionDate(submissionEntity.getSubmissionDate())
+                .lateSubmission(submissionEntity.isLateSubmission())
+                .userName(userEntity.getName())
+                .userEmail(userEntity.getEmail())
+                .file(fileData)
+                .build();
+        getSubmissionModels.add(getSubmissionModel);
+      }
+      return ResponseEntity.status(HttpStatus.OK).body(getSubmissionModels);
+    } catch (Exception e) {
+      e.printStackTrace();
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("message", "Couldn't get submissions"));
     }
   }
 }

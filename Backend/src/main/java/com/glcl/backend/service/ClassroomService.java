@@ -3,13 +3,13 @@ package com.glcl.backend.service;
 import com.glcl.backend.Entity.ClassroomEntity;
 import com.glcl.backend.Entity.PostEntity;
 import com.glcl.backend.Entity.UserEntity;
-import com.glcl.backend.model.*;
 import com.glcl.backend.model.classroomModel.ClassroomCreateModel;
 import com.glcl.backend.model.classroomModel.JoinByCodeModel;
 import com.glcl.backend.model.classroomModel.LeaveClassroomModel;
 import com.glcl.backend.model.postModel.CreatePostModel;
 import com.glcl.backend.model.postModel.GetPostModel;
 import com.glcl.backend.model.postModel.UpdatePostModel;
+import com.glcl.backend.model.userModel.AddDeleteUserModel;
 import com.glcl.backend.repository.*;
 import com.glcl.backend.utils.ClassroomUtils;
 import com.mongodb.client.gridfs.GridFSBucket;
@@ -48,7 +48,7 @@ public class ClassroomService {
       ClassroomEntity classroomEntity = ClassroomEntity.builder()
               .classroomName(classroomModel.getClassroomName())
               .teachers(teacher)
-              .code(classroomUtils.codeGenerate())
+              .code(classroomUtils.codeGenerate()) // Generate code for joining to classroom
               .creator(userEntity)
               .build();
       classroomRepository.save(classroomEntity);
@@ -81,9 +81,11 @@ public class ClassroomService {
       while (iterator1.hasNext()) {
         String email = iterator1.next();
         Optional<UserEntity> userEntityOptional = userRepository.findByEmail(email);
+        // Check if the user exists in the system
         if (userEntityOptional.isPresent()) {
           UserEntity userEntity = userEntityOptional.get();
           List<ClassroomEntity> temp = new ArrayList<>(userEntity.getClassroom());
+          // Check if the user exists in the classroom
           if (!temp.contains(classroomEntity)) {
             users.add(userEntityOptional.get());
           } else {
@@ -102,6 +104,7 @@ public class ClassroomService {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("message", "User/s don't exist"));
       }
       List<UserEntity> prevUsers = new ArrayList<>();
+      // Check if the user is a teacher or student and update classroom accordingly
       if (addDeleteUserModel.getType().equalsIgnoreCase("student")) {
         prevUsers = classroomEntity.getStudents();
         prevUsers.addAll(users);
