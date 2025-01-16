@@ -1,19 +1,20 @@
-import { useState } from "react";
-import reactLogo from "./assets/react.svg";
-import viteLogo from "/vite.svg";
 import "./App.css";
-import { H1, UL } from "./Tags";
+import Navigation from "./components/Navigation";
+import { SidebarProvider, SidebarTrigger } from "./components/ui/sidebar";
+import AppSidebar from "./components/AppSidebar";
 
 function App() {
   return (
     <>
-      <H1>
-        Hello
-      </H1>
-      <UL>
-        <li>kk</li>
-        <li>jj</li>
-      </UL>
+      <Navigation />
+      <SidebarProvider>
+        <AppSidebar />
+        <main>
+          <div className="mt-16">
+            <SidebarTrigger />
+          </div>
+        </main>
+      </SidebarProvider>
     </>
   );
 }
