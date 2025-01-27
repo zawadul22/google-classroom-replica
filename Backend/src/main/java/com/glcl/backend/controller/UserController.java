@@ -19,8 +19,8 @@ public class UserController {
     return userService.create(userModel);
   }
 
-  @GetMapping("/classroom/{classroom}")
-  public ResponseEntity<Object> getClassroom(@PathVariable String classroom) {
-    return userService.getUserClassroom(classroom);
+  @GetMapping("/classroom/{email}")
+  public ResponseEntity<Object> getClassroom(@PathVariable String email) {
+    return userService.getUserClassroom(email);
   }
 }

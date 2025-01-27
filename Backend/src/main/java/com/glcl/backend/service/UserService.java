@@ -2,6 +2,7 @@ package com.glcl.backend.service;
 
 import com.glcl.backend.Entity.UserEntity;
 import com.glcl.backend.model.classroomModel.GetClassroomModel;
+import com.glcl.backend.model.classroomModel.GetUserClassroomList;
 import com.glcl.backend.model.userModel.UserModel;
 import com.glcl.backend.repository.ClassroomRepository;
 import com.glcl.backend.repository.UserRepository;
@@ -10,6 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -41,14 +43,30 @@ public class UserService {
       Optional<UserEntity> userEntityOptional = userRepository.findByEmail(email);
       assert userEntityOptional.isPresent();
       UserEntity userEntity = userEntityOptional.get();
-      List<GetClassroomModel> classes2 = userEntity.getClassroom()
+      List<GetClassroomModel> asTeacher = new ArrayList<>();
+      List<GetClassroomModel> asStudent = userEntity.getClassroom()
               .stream()
-              .map(c -> new GetClassroomModel(
+              .filter(c->{
+                if(c.getTeachers().contains(userEntity)){
+                  asTeacher.add(new GetClassroomModel(c.getId(), c.getClassroomName()));
+                  return false;
+                }
+                else{
+                    return true;
+                }
+              })
+              .map(c ->
+                 new GetClassroomModel(
                       c.getId(),
                       c.getClassroomName()
               ))
               .toList();
-      return ResponseEntity.ok().body(classes2);
+      GetUserClassroomList getUserClassroomList = GetUserClassroomList.builder()
+              .asTeacher(asTeacher)
+              .asStudent(asStudent)
+              .build();
+      return ResponseEntity.ok().body(getUserClassroomList);
+//      return null;
     } catch (Exception e) {
       throw new RuntimeException(e.getCause());
     }

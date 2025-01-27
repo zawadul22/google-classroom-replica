@@ -12,25 +12,50 @@ import {
 } from './ui/sidebar'
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from './ui/collapsible';
 import { ChevronDown } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
 
 import teacher from "../assets/school.png"
 import student from "../assets/student.png"
 import home from "../assets/home.png"
 import { Separator } from './ui/separator';
-import { Link, NavLink } from 'react-router';
+import SidebarData from './SidebarData';
+import SidebarSkeleton from './SidebarSkeleton';
+import { NavLink, useLocation } from 'react-router';
 
 const AppSidebar = (prop) => {
 
-  const { toggleSidebar } = useSidebar();
+  const { toggleSidebar, setOpenMobile } = useSidebar();
   const { sidebarOpen } = prop;
-
-  const classrooms = ["Classroom 1Classroom 1Classroom 1", "Classroom 2", "Classroom 3", "Classroom 4", "Classroom 5"];
+  const location = useLocation();
+  const url = import.meta.env.VITE_BACKEND_URL;
 
   useEffect(() => {
     toggleSidebar();
   }, [sidebarOpen])
 
-  useEffect(() => { }, [location.pathname])
+  const getUserClassrooms = async () => {
+    try {
+      const response = await fetch(`${url}/user/classroom/zawad@gmail.com`);
+      if (response.ok) {
+        const data = await response.json();
+        return data;
+      }
+      else {
+        console.log("Could not fetch data")
+      }
+    }
+    catch (error) {
+      console.error(error);
+    }
+  }
+
+  const { data: userClassrooms, isLoading } = useQuery({
+    queryKey: ['classrooms'],
+    queryFn: getUserClassrooms,
+    refetchOnMount: false,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false
+  })
 
   return (
     <Sidebar className="pl-3 z-100" >
@@ -38,12 +63,12 @@ const AppSidebar = (prop) => {
         <SidebarGroup>
           <SidebarMenu>
             <SidebarMenuItem>
-              <a href="/">
-                <SidebarMenuButton isActive={location.pathname === '/'}>
+              <SidebarMenuButton asChild isActive={location.pathname === '/'} onClick={() => setOpenMobile(false)}>
+                <NavLink to="/">
                   <img src={home} alt="home" className="w-5 mr-3" />
                   Home
-                </SidebarMenuButton>
-              </a>
+                </NavLink>
+              </SidebarMenuButton>
             </SidebarMenuItem>
           </SidebarMenu>
         </SidebarGroup>
@@ -59,19 +84,11 @@ const AppSidebar = (prop) => {
             </SidebarGroupLabel>
             <CollapsibleContent>
               <SidebarGroupContent>
-                <SidebarMenu>
-                  {classrooms.map((classroom, index) => (
-                    <SidebarMenuItem key={index}>
-                      <a href={`/teacher/${index}`}>
-                        <SidebarMenuButton isActive={location.pathname === `/teacher/${index}`}>
-                          <span className='truncate'>
-                            {classroom}
-                          </span>
-                        </SidebarMenuButton>
-                      </a>
-                    </SidebarMenuItem>
-                  ))}
-                </SidebarMenu>
+                {isLoading ?
+                  <SidebarSkeleton />
+                  :
+                  <SidebarData classroomList={userClassrooms?.asTeacher} type="teacher" setOpenMobile={setOpenMobile} />
+                }
               </SidebarGroupContent>
             </CollapsibleContent>
           </SidebarGroup>
@@ -88,19 +105,11 @@ const AppSidebar = (prop) => {
             </SidebarGroupLabel>
             <CollapsibleContent>
               <SidebarGroupContent>
-                <SidebarMenu >
-                  {classrooms.map((classroom, index) => (
-                    <SidebarMenuItem key={index}>
-                      <a href={`/student/${index}`}>
-                        <SidebarMenuButton isActive={location.pathname === `/student/${index}`}>
-                          <span className='truncate'>
-                            {classroom}
-                          </span>
-                        </SidebarMenuButton>
-                      </a>
-                    </SidebarMenuItem>
-                  ))}
-                </SidebarMenu>
+                {isLoading ?
+                  <SidebarSkeleton />
+                  :
+                  <SidebarData classroomList={userClassrooms?.asStudent} type="student" setOpenMobile={setOpenMobile} />
+                }
               </SidebarGroupContent>
             </CollapsibleContent>
           </SidebarGroup>
