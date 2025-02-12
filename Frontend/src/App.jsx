@@ -22,8 +22,8 @@ function App() {
         <Navigation sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
         <SidebarProvider open={sidebarOpen} >
           <AppSidebar sidebarOpen={sidebarOpen} />
-          <main>
-            <div className="mt-20 ml-6 mr-6">
+          <main className="w-full">
+            <div className="mt-[72px] ml-6 mr-6">
               {/* <SidebarTrigger/> */}
               <Routes>
                 <Route path="/" element={<Home />} />

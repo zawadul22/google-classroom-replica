@@ -10,4 +10,5 @@ import lombok.NoArgsConstructor;
 public class ClassroomCreateModel {
   private String classroomName;
   private String teacherName;
+  private String section;
 }

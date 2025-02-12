@@ -27,7 +27,7 @@ const AppSidebar = (prop) => {
   const { toggleSidebar, setOpenMobile } = useSidebar();
   const { sidebarOpen } = prop;
   const location = useLocation();
-  const url = import.meta.env.VITE_BACKEND_URL;
+  const apiUrl = import.meta.env.VITE_BACKEND_URL;
 
   useEffect(() => {
     toggleSidebar();
@@ -35,7 +35,7 @@ const AppSidebar = (prop) => {
 
   const getUserClassrooms = async () => {
     try {
-      const response = await fetch(`${url}/user/classroom/zawad@gmail.com`);
+      const response = await fetch(`${apiUrl}/user/classroom/zawad@gmail.com`);
       if (response.ok) {
         const data = await response.json();
         return data;

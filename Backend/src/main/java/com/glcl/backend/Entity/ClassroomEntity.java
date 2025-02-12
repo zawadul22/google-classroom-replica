@@ -23,6 +23,7 @@ public class ClassroomEntity {
   private String id;
   private String classroomName;
   private String code;
+  private String section;
   @JsonBackReference
   @Reference(UserEntity.class)
   private List<UserEntity> teachers;

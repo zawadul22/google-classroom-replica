@@ -48,6 +48,7 @@ public class ClassroomService {
       ClassroomEntity classroomEntity = ClassroomEntity.builder()
               .classroomName(classroomModel.getClassroomName())
               .teachers(teacher)
+              .section(classroomModel.getSection())
               .code(classroomUtils.codeGenerate()) // Generate code for joining to classroom
               .creator(userEntity)
               .build();
