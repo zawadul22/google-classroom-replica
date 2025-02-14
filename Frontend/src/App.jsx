@@ -19,7 +19,10 @@ function App() {
   return (
     <>
       <QueryClientProvider client={queryClient}>
-        <Navigation sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
+        <Navigation
+          sidebarOpen={sidebarOpen}
+          setSidebarOpen={setSidebarOpen}
+        />
         <SidebarProvider open={sidebarOpen} >
           <AppSidebar sidebarOpen={sidebarOpen} />
           <main className="w-full">

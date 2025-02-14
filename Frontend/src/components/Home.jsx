@@ -1,9 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card";
 
 import { H4 } from "@/Tags";
-import { Avatar, AvatarImage } from "./ui/avatar";
-import avatarImage from "../assets/man.png";
+import ClassroomCards from "./ClassroomCards";
 
 const Home = () => {
   const apiUrl = import.meta.env.VITE_BACKEND_URL;
@@ -23,7 +21,7 @@ const Home = () => {
     }
   }
 
-  const { data: userClassrooms, isLoading } = useQuery({
+  const { data: userClassrooms } = useQuery({
     queryKey: ['classrooms'],
     queryFn: getUserClassrooms,
     refetchOnMount: false,
@@ -34,40 +32,25 @@ const Home = () => {
   console.log(userClassrooms)
   return (
     <>
-      <div className="w-full">
+      <div className="w-full pb-10">
         <div className="mb-10 w-full">
+          {!userClassrooms && userClassrooms?.asTeacher?.length === 0 && userClassrooms?.asStudent?.length === 0 &&
+            <div className="w-full flex flex-col justify-center items-center h-96">
+              <p className="text-2xl font-semibold">No classrooms found</p>
+              <p className="text-center mt-6">Click on the + button to create or join a classroom</p>
+            </div>
+          }
           {userClassrooms?.asTeacher &&
             <div className="w-full">
               <H4>As Teacher</H4>
               <br />
               <div className="classroom-grid">
-                {/* {userClassrooms?.asTeacher.map((classroom, index) => (
-                  <Card key={index}>
-                    <CardHeader>
-                      <CardTitle>{classroom?.classroomName}</CardTitle>
-                    </CardHeader>
-                  </Card>
-                ))} */}
-                {Array.from({ length: 8 }).map((_, index) => (
-                  <Card key={index} className="custom-card">
-                    <CardHeader>
-                      <CardTitle className="text-white">
-                        Classroom {index + 1}
-                      </CardTitle>
-                      <CardDescription className="text-white">
-                        Section 3
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="relative">
-                        <p className="absolute top-5 font-semibold truncate w-48">Zawadul Islam Nibir</p>
-                        <Avatar className="absolute right-0 -bottom-12 w-20 h-20">
-                          <AvatarImage src={avatarImage} />
-                        </Avatar>
-                        <p className="absolute top-11">10 participants</p>
-                      </div>
-                    </CardContent>
-                  </Card>
+                {userClassrooms?.asTeacher.map((classroom, index) => (
+                  <ClassroomCards
+                    key={index}
+                    classroom={classroom}
+                    type="teacher"
+                  />
                 ))}
               </div>
             </div>
@@ -78,13 +61,13 @@ const Home = () => {
             <div>
               <H4>As Student</H4>
               <br />
-              <div className="grid grid-col-2 gap-4">
+              <div className="classroom-grid">
                 {userClassrooms?.asStudent.map((classroom, index) => (
-                  <Card key={index}>
-                    <CardHeader>
-                      <CardTitle>{classroom?.classroomName}</CardTitle>
-                    </CardHeader>
-                  </Card>
+                  <ClassroomCards
+                    key={index}
+                    classroom={classroom}
+                    type="student"
+                  />
                 ))}
               </div>
             </div>

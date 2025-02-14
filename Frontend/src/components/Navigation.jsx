@@ -6,7 +6,7 @@ import NavbarMenu from './NavbarMenu';
 
 const Navigation = (props) => {
 
-  const { sidebarOpen, setSidebarOpen } = props;
+  const { sidebarOpen, setSidebarOpen, dialogOpen, setDialogOpen } = props;
 
   return (
     <nav className='pr-6 pl-4 pt-4 pb-2 flex justify-between border-b border-gray-200 z-20 fixed w-full bg-white'>
