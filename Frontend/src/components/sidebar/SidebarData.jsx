@@ -1,5 +1,5 @@
 import { NavLink, useLocation } from 'react-router'
-import { SidebarMenu, SidebarMenuButton, SidebarMenuItem } from './ui/sidebar'
+import { SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '../ui/sidebar'
 
 const SidebarData = ({ classroomList, type, setOpenMobile }) => {
   const location = useLocation();

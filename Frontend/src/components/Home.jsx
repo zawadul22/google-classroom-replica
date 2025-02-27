@@ -48,6 +48,7 @@ const Home = () => {
                 {userClassrooms?.asTeacher.map((classroom, index) => (
                   <ClassroomCards
                     key={index}
+                    index={index}
                     classroom={classroom}
                     type="teacher"
                   />
@@ -65,6 +66,7 @@ const Home = () => {
                 {userClassrooms?.asStudent.map((classroom, index) => (
                   <ClassroomCards
                     key={index}
+                    index={index}
                     classroom={classroom}
                     type="student"
                   />

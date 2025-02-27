@@ -1,7 +1,7 @@
-import { NavigationMenu, NavigationMenuItem, NavigationMenuList } from './ui/navigation-menu'
+import { NavigationMenu, NavigationMenuItem, NavigationMenuList } from '../ui/navigation-menu'
 import { NavLink } from 'react-router'
 
-import menu from "../assets/menu.svg"
+import menu from "../../assets/menu.svg"
 import NavbarMenu from './NavbarMenu';
 
 const Navigation = (props) => {

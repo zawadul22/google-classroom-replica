@@ -9,15 +9,15 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   useSidebar
-} from './ui/sidebar'
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from './ui/collapsible';
+} from '../ui/sidebar'
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '../ui/collapsible';
 import { ChevronDown } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 
-import teacher from "../assets/school.png"
-import student from "../assets/student.png"
-import home from "../assets/home.png"
-import { Separator } from './ui/separator';
+import teacher from "../../assets/school.png"
+import student from "../../assets/student.png"
+import home from "../../assets/home.png"
+import { Separator } from '../ui/separator';
 import SidebarData from './SidebarData';
 import SidebarSkeleton from './SidebarSkeleton';
 import { NavLink, useLocation } from 'react-router';

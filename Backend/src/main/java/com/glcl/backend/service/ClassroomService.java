@@ -156,7 +156,7 @@ public class ClassroomService {
       } else {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("message", "Classroom not found"));
       }
-      if (userEntity.getClassroom().contains(classroomEntity)) {
+      if (userEntity.getClassroom().contains(classroomEntity) || classroomEntity.getStudents().contains(userEntity)) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(Map.of("message", "Already exists in this classroom"));
       }

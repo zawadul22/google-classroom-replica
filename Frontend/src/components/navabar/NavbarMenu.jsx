@@ -1,10 +1,10 @@
-import { Popover, PopoverContent, PopoverTrigger } from './ui/popover'
-import { Command, CommandItem, CommandList } from './ui/command'
-import { Avatar, AvatarImage } from './ui/avatar'
+import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover'
+import { Command, CommandItem, CommandList } from '../ui/command'
+import { Avatar, AvatarImage } from '../ui/avatar'
 
-import avatar from "../assets/avatar-96.png"
-import add from "../assets/add-96.png"
-import ClassroomDialog from './ClassroomDialog'
+import avatar from "../../assets/avatar-96.png"
+import add from "../../assets/add-96.png"
+import ClassroomDialog from '../dialog/ClassroomDialog'
 import { useState } from 'react'
 
 const NavbarMenu = () => {

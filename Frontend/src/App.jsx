@@ -3,13 +3,14 @@ import { Route, Routes } from "react-router";
 import { SidebarProvider } from "./components/ui/sidebar";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
-import Navigation from "./components/Navigation";
-import AppSidebar from "./components/AppSidebar";
+import Navigation from "./components/navabar/Navigation";
+import AppSidebar from "./components/sidebar/AppSidebar";
 import Home from "./components/Home";
 import Taecher from "./components/Teacher";
 import Student from "./components/Student";
 
 import "./App.css";
+import { ToastContainer } from "react-toastify";
 
 function App() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -35,6 +36,7 @@ function App() {
               </Routes>
             </div>
           </main>
+          <ToastContainer position="bottom-right" pauseOnHover={false} />
         </SidebarProvider>
       </QueryClientProvider>
     </>
