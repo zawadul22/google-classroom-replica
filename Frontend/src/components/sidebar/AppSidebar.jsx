@@ -64,10 +64,12 @@ const AppSidebar = (prop) => {
           <SidebarMenu>
             <SidebarMenuItem>
               <SidebarMenuButton asChild isActive={location.pathname === '/'} onClick={() => setOpenMobile(false)}>
-                <NavLink to="/">
+                {/* <NavLink to="/"> */}
+                <a href='/'>
                   <img src={home} alt="home" className="w-5 mr-3" />
                   Home
-                </NavLink>
+                </a>
+                {/* </NavLink> */}
               </SidebarMenuButton>
             </SidebarMenuItem>
           </SidebarMenu>

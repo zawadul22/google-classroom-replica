@@ -176,6 +176,15 @@ public class ClassroomService {
     }
   }
 
+  public ResponseEntity<Object> getClassroomName(String classroomId) {
+    Optional<ClassroomEntity> classroomEntityOptional = classroomRepository.findById(classroomId);
+    if (classroomEntityOptional.isEmpty()) {
+      return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("message", "Classroom not found"));
+    }
+    ClassroomEntity classroomEntity = classroomEntityOptional.get();
+    return ResponseEntity.status(HttpStatus.OK).body(Map.of("name", classroomEntity.getClassroomName()));
+  }
+
   public ResponseEntity<Object> getTeachers(String classroomId) {
     Optional<ClassroomEntity> classroomEntityOptional = classroomRepository.findById(classroomId);
     if (classroomEntityOptional.isPresent()) {

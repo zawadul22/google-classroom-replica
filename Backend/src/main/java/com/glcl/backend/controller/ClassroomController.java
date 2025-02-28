@@ -29,6 +29,11 @@ public class ClassroomController {
     return classroomService.addUser(addDeleteUserModel);
   }
 
+  @GetMapping(value = "/getClassroomName")
+  public ResponseEntity<Object> getClassroomNameController(@RequestParam String classroomId) {
+    return classroomService.getClassroomName(classroomId);
+  }
+
   @GetMapping(value = "/getTeachers")
   public ResponseEntity<Object> getTeachersController(@RequestParam String classroomId) {
     return classroomService.getTeachers(classroomId);

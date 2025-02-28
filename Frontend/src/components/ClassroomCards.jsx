@@ -8,7 +8,8 @@ import { NavLink } from 'react-router';
 
 const ClassroomCards = ({ index, classroom, type }) => {
   return (
-    <NavLink to={`/${type}/${index}`}>
+    // <NavLink to={`/${type}/${classroom?.id}`}>
+    <a href={`/${type}/${classroom?.id}`}>
       <Card className="custom-card" style={{ backgroundImage: `url(${type === "teacher" ? teacherPoster : studentPoster})` }}>
         <CardHeader>
           <CardTitle className="text-white">
@@ -28,7 +29,8 @@ const ClassroomCards = ({ index, classroom, type }) => {
           </div>
         </CardContent>
       </Card>
-    </NavLink>
+    </a>
+    // </NavLink>
   )
 }
 
