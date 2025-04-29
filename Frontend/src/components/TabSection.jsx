@@ -19,9 +19,9 @@ const TabSection = () => {
             <TabsTrigger value="people">People</TabsTrigger>
           </TabsList>
           <TabsContent value="stream">
-            <Suspense fallback={<div>Loading...</div>}>
+            {/* <Suspense fallback={<div>Loading...</div>}> */}
               <Posts type={param.type} />
-            </Suspense>
+            {/* </Suspense> */}
           </TabsContent>
           <TabsContent value="assignments"><Assignments /></TabsContent>
           <TabsContent value="people"><People /></TabsContent>
