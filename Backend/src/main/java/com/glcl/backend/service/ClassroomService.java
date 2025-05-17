@@ -385,12 +385,15 @@ public class ClassroomService {
                           .build();
                 } else {
                   try {
+                    String fileNameGFS = gridFSFile.getFilename();
                     InputStream inputStream = gridFSBucket.openDownloadStream(gridFSFile.getObjectId());
                     byte[] fileData = inputStream.readAllBytes();
+
                     getPostModel = GetPostModel.builder()
                             .post(postEntity.getPost())
                             .creator(postEntity.getCreator().getName())
                             .file(fileData)
+                            .fileName(fileNameGFS)
                             .build();
                   } catch (Exception e) {
                     e.printStackTrace();

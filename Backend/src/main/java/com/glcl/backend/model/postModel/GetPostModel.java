@@ -13,4 +13,5 @@ public class GetPostModel {
   private String post;
   private String creator;
   private byte[] file;
+  private String fileName;
 }

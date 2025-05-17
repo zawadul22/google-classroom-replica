@@ -1,7 +1,7 @@
 import { useParams } from "react-router"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
 
-import Posts from "./Posts";
+import PostSection from "./posts/PostSection";
 import Assignments from "./Assignments";
 import People from "./People";
 import { Suspense } from "react";
@@ -20,7 +20,7 @@ const TabSection = () => {
           </TabsList>
           <TabsContent value="stream">
             {/* <Suspense fallback={<div>Loading...</div>}> */}
-              <Posts type={param.type} />
+            <PostSection type={param.type} />
             {/* </Suspense> */}
           </TabsContent>
           <TabsContent value="assignments"><Assignments /></TabsContent>
