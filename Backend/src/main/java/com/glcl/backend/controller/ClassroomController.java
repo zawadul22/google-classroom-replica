@@ -7,10 +7,16 @@ import com.glcl.backend.model.postModel.CreatePostModel;
 import com.glcl.backend.model.postModel.UpdatePostModel;
 import com.glcl.backend.model.userModel.AddDeleteUserModel;
 import com.glcl.backend.service.ClassroomService;
+import com.glcl.backend.service.FileService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.core.io.InputStreamResource;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.io.File;
+import java.nio.file.Files;
 
 @RestController
 @RequiredArgsConstructor
@@ -18,6 +24,7 @@ import org.springframework.web.multipart.MultipartFile;
 @RequestMapping(value = "/classroom")
 public class ClassroomController {
   private final ClassroomService classroomService;
+  private final FileService fileService;
 
   @PostMapping(value = "/create")
   public ResponseEntity<Object> createClassController(@RequestBody ClassroomCreateModel classroomCreateModel) {
@@ -82,5 +89,15 @@ public class ClassroomController {
   @GetMapping(value = "/post/get/{classroomId}")
   public ResponseEntity<Object> getPostController(@PathVariable("classroomId") String classroomId) {
     return classroomService.getPosts(classroomId);
+  }
+
+  @GetMapping(value = "/post/getFile")
+  public ResponseEntity<InputStreamResource> getPostFileController(@RequestParam String fileName) throws Exception {
+    File fileToDownload = fileService.getFile(fileName);
+    return ResponseEntity.ok()
+            .header("Content-Disposition", "attachment; filename=\"" + fileToDownload.getName() + "\"")
+            .contentLength(fileToDownload.length())
+            .contentType(MediaType.APPLICATION_OCTET_STREAM)
+            .body(new InputStreamResource(Files.newInputStream(fileToDownload.toPath())));
   }
 }
