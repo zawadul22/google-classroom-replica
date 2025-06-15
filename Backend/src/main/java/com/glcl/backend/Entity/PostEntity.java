@@ -22,7 +22,7 @@ public class PostEntity {
   private String id;
   private String post;
 //  private Binary file;
-  private String file;
+//  private String file;
   private String filename;
   @JsonBackReference
   @Reference(UserEntity.class)

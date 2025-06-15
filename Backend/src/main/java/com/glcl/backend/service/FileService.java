@@ -48,8 +48,10 @@ public class FileService {
     if(fileName == null){
       throw new NullPointerException("File name required");
     }
-    File fileToDownload = new File(uploadDir + File.separator + uploadDir + File.separator + fileName);
-    if (!Objects.equals(fileToDownload.getParent(), uploadDir)) {
+    String currentDirectory = System.getProperty("user.dir");
+    String directoryPath = currentDirectory + File.separator + uploadDir;
+    File fileToDownload = new File(directoryPath + File.separator + fileName);
+    if (!Objects.equals(fileToDownload.getParent(), directoryPath)) {
       throw new SecurityException("Unsupported file name!");
     }
     if (!fileToDownload.exists()) {
@@ -62,8 +64,10 @@ public class FileService {
     if(fileName == null){
       throw new NullPointerException("File name required");
     }
-    File fileToDelete = new File(uploadDir + File.separator + fileName);
-    if (!Objects.equals(fileToDelete.getParent(), uploadDir)) {
+    String currentDirectory = System.getProperty("user.dir");
+    String directoryPath = currentDirectory + File.separator + uploadDir;
+    File fileToDelete = new File(directoryPath + File.separator + fileName);
+    if (!Objects.equals(fileToDelete.getParent(), directoryPath)) {
       throw new SecurityException("Unsupported file name!");
     }
     if (!fileToDelete.exists()) {

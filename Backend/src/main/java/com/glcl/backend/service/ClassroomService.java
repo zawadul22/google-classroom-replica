@@ -294,18 +294,20 @@ public class ClassroomService {
       if (!classroomEntity.getStudents().contains(userEntity) && !classroomEntity.getTeachers().contains(userEntity)) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("message", "The user does not exist in the given classroom"));
       }
-      boolean saveFileStatus = fileService.saveFile(file);
-      if (!saveFileStatus) {
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("message", "Couldn't save file"));
-      }
       PostEntity postEntity = PostEntity.builder()
               .post(createPostModel.getPost())
               .classroom(classroomEntity)
               .creator(userEntity)
-//              .file(file.isEmpty() ? null : new Binary(BsonBinarySubType.BINARY, file.getBytes()))
-//              .file(file.isEmpty() ? null : gridFsTemplate.store(file.getInputStream(), file.getOriginalFilename(), file.getContentType()).toString())
-              .filename(file.getOriginalFilename())
               .build();
+      if(file != null && !file.isEmpty()){
+        boolean saveFileStatus = fileService.saveFile(file);
+        if (!saveFileStatus) {
+          return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("message", "Couldn't save file"));
+        }
+        else{
+          postEntity.setFilename(file.getOriginalFilename());
+        }
+      }
       postRepository.save(postEntity);
       return ResponseEntity.status(HttpStatus.OK).body(Map.of("message", "Post has been created successfully"));
     } catch (Exception e) {
@@ -334,8 +336,13 @@ public class ClassroomService {
         postRepository.save(postEntity);
       }
       if (!file.isEmpty()) {
-//        postEntity.setFile(new Binary(BsonBinarySubType.BINARY, file.getBytes()));
-        postEntity.setFile(gridFsTemplate.store(file.getInputStream(), file.getOriginalFilename(), file.getContentType()).toString());
+        boolean result = fileService.saveFile(file);
+        if(result){
+          postEntity.setFilename(file.getName());
+        }
+        else{
+          return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("message", "Couldn't save file"));
+        }
         postRepository.save(postEntity);
       }
       return ResponseEntity.status(HttpStatus.OK).body(Map.of("message", "Post has been updated successfully"));
@@ -382,33 +389,39 @@ public class ClassroomService {
       List<GetPostModel> postModels = new ArrayList<>();
       postModels = postEntities.stream()
               .map(postEntity -> {
-                GridFSFile gridFSFile = gridFsTemplate.findOne(new Query(Criteria.where("_id").is(postEntity.getFile())));
-                GetPostModel getPostModel = new GetPostModel();
-                if (gridFSFile == null) {
-                  getPostModel = GetPostModel.builder()
-                          .post(postEntity.getPost())
-                          .creator(postEntity.getCreator().getName())
-                          .build();
-                } else {
-                  try {
-                    String fileNameGFS = gridFSFile.getFilename();
-                    InputStream inputStream = gridFSBucket.openDownloadStream(gridFSFile.getObjectId());
-                    byte[] fileData = inputStream.readAllBytes();
-
-                    getPostModel = GetPostModel.builder()
-                            .post(postEntity.getPost())
-                            .creator(postEntity.getCreator().getName())
-                            .file(fileData)
-                            .fileName(fileNameGFS)
-                            .build();
-                  } catch (Exception e) {
-                    e.printStackTrace();
-                    getPostModel = GetPostModel.builder()
-                            .post(postEntity.getPost())
-                            .creator(postEntity.getCreator().getName())
-                            .build();
-                  }
-                }
+//                GridFSFile gridFSFile = gridFsTemplate.findOne(new Query(Criteria.where("_id").is(postEntity.getFile())));
+                GetPostModel getPostModel = GetPostModel.builder()
+                        .post(postEntity.getPost())
+                        .creator(postEntity.getCreator().getName())
+//                        .file(postEntity.getFilename())
+                        .fileName(postEntity.getFilename())
+                        .build();
+//                if (gridFSFile == null) {
+//                  getPostModel = GetPostModel.builder()
+//                          .post(postEntity.getPost())
+//                          .creator(postEntity.getCreator().getName())
+//                          .build();
+//                } else {
+//                  try {
+//                    String fileNameGFS = gridFSFile.getFilename();
+//                    InputStream inputStream = gridFSBucket.openDownloadStream(gridFSFile.getObjectId());
+//                    byte[] fileData = inputStream.readAllBytes();
+//
+//                    getPostModel = GetPostModel.builder()
+//                            .post(postEntity.getPost())
+//                            .creator(postEntity.getCreator().getName())
+//                            .file(fileData)
+//                            .fileName(fileNameGFS)
+//                            .build();
+//                  } catch (Exception e) {
+//                    e.printStackTrace();
+//                    getPostModel = GetPostModel.builder()
+//                            .post(postEntity.getPost())
+//                            .creator(postEntity.getCreator().getName())
+//                            .build();
+//                  }
+//                }
+//                if(postEntity.getFile().equals())
                 return getPostModel;
               }).toList();
       return ResponseEntity.status(HttpStatus.OK).body(postModels);

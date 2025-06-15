@@ -8,10 +8,12 @@ import com.glcl.backend.model.postModel.UpdatePostModel;
 import com.glcl.backend.model.userModel.AddDeleteUserModel;
 import com.glcl.backend.service.ClassroomService;
 import com.glcl.backend.service.FileService;
+import jakarta.validation.constraints.Null;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.lang.Nullable;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -20,7 +22,7 @@ import java.nio.file.Files;
 
 @RestController
 @RequiredArgsConstructor
-@CrossOrigin
+@CrossOrigin("*")
 @RequestMapping(value = "/classroom")
 public class ClassroomController {
   private final ClassroomService classroomService;
@@ -72,12 +74,14 @@ public class ClassroomController {
   }
 
   @PostMapping(value = "/post/create")
-  public ResponseEntity<Object> postCreateController(@RequestPart("body") CreatePostModel createPostModel, @RequestPart("file") MultipartFile file) {
+  public ResponseEntity<Object> postCreateController(@RequestPart("body") CreatePostModel createPostModel,
+                                                     @RequestPart(value = "file", required = true) MultipartFile file) {
     return classroomService.createPost(createPostModel, file);
   }
 
   @PatchMapping(value = "/post/update")
-  public ResponseEntity<Object> postUpdateController(@RequestPart("body") UpdatePostModel updatePostModel, @RequestPart("file") MultipartFile file) {
+  public ResponseEntity<Object> postUpdateController(@RequestPart("body") UpdatePostModel updatePostModel,
+                                                     @RequestPart(value = "file", required = false) MultipartFile file) {
     return classroomService.updatePost(updatePostModel, file);
   }
 
@@ -94,10 +98,19 @@ public class ClassroomController {
   @GetMapping(value = "/post/getFile")
   public ResponseEntity<InputStreamResource> getPostFileController(@RequestParam String fileName) throws Exception {
     File fileToDownload = fileService.getFile(fileName);
+    String mimeType = Files.probeContentType(fileToDownload.toPath());
+    if (mimeType == null) {
+      mimeType = MediaType.APPLICATION_OCTET_STREAM_VALUE; // fallback
+    }
+//    return ResponseEntity.ok()
+//            .header("Content-Disposition", "attachment; filename=\"" + fileToDownload.getName() + "\"")
+//            .contentLength(fileToDownload.length())
+//            .contentType(MediaType.APPLICATION_OCTET_STREAM)
+//            .body(new InputStreamResource(Files.newInputStream(fileToDownload.toPath())));
     return ResponseEntity.ok()
-            .header("Content-Disposition", "attachment; filename=\"" + fileToDownload.getName() + "\"")
+            .header("Content-Disposition", "inline; filename=\"" + fileToDownload.getName() + "\"")
             .contentLength(fileToDownload.length())
-            .contentType(MediaType.APPLICATION_OCTET_STREAM)
+            .contentType(MediaType.parseMediaType(mimeType))
             .body(new InputStreamResource(Files.newInputStream(fileToDownload.toPath())));
   }
 }
