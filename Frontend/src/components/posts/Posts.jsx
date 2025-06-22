@@ -3,6 +3,7 @@ import { useParams } from "react-router";
 import avatar from "../../assets/man.png"
 import { Avatar, AvatarImage } from "../ui/avatar";
 import { Skeleton } from "../ui/skeleton";
+import FileViewer from "./FileViewer";
 
 const Posts = () => {
   const apiUrl = import.meta.env.VITE_BACKEND_URL;
@@ -71,8 +72,19 @@ const Posts = () => {
                   )}
                 </div>
               </div>
+<<<<<<< HEAD
               <div className="px-6 py-3 border-[1px] border-t-0 rounded-b-lg">
                 Comment
+=======
+              <div className="mt-4">{post?.post}</div>
+              <div>
+                {/* <img
+                  src={`${apiUrl}/classroom/post/getFile?fileName=${post?.fileName}`}
+                  alt=""
+                  className="w-[200px]"
+                /> */}
+                <FileViewer file={post?.fileName} />
+>>>>>>> a9cae50 (Add a new file viewer component in the frontend)
               </div>
             </div>
           ))
