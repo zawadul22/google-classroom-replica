@@ -13,7 +13,6 @@ const Posts = () => {
     const response = await fetch(`${apiUrl}/classroom/post/get/${param.index}`);
     if (response.ok) {
       const data = await response.json();
-      // Attach file type detection logic
       return data;
     }
     else {
@@ -29,7 +28,7 @@ const Posts = () => {
     refetchOnReconnect: true
   })
 
-  console.log(posts?.[0]?.fileName)
+  // console.log(posts?.[0]?.fileName)
 
   return (
     <div>

@@ -294,18 +294,22 @@ public class ClassroomService {
       if (!classroomEntity.getStudents().contains(userEntity) && !classroomEntity.getTeachers().contains(userEntity)) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("message", "The user does not exist in the given classroom"));
       }
-      boolean saveFileStatus = fileService.saveFile(file);
-      if (!saveFileStatus) {
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("message", "Couldn't save file"));
-      }
+
       PostEntity postEntity = PostEntity.builder()
               .post(createPostModel.getPost())
               .classroom(classroomEntity)
               .creator(userEntity)
 //              .file(file.isEmpty() ? null : new Binary(BsonBinarySubType.BINARY, file.getBytes()))
 //              .file(file.isEmpty() ? null : gridFsTemplate.store(file.getInputStream(), file.getOriginalFilename(), file.getContentType()).toString())
-              .filename(file.getOriginalFilename())
+//              .filename(file.getOriginalFilename())
               .build();
+      if(!file.isEmpty() ){
+        boolean saveFileStatus = fileService.saveFile(file);
+        if (!saveFileStatus) {
+          return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("message", "Couldn't save file"));
+        }
+        postEntity.setFilename(file.getName());
+      }
       postRepository.save(postEntity);
       return ResponseEntity.status(HttpStatus.OK).body(Map.of("message", "Post has been created successfully"));
     } catch (Exception e) {
